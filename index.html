@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cỗ máy Thương mại Hợp nhất · One Solution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0E14; --bg2:#0E1320; --surface:#141B2A; --surface2:#1A2335;
+  --ink:#E8EDF5; --muted:#8694AB; --line:#27324A;
+  --c-loi:#5B8DEF; --c-dist:#19C2AC; --c-cast:#E8973A; --c-funnel:#B57BFF;
+  --c-rev:#F5C451; --c-engine:#8B9CFF; --c-affree:#38BDF8; --c-us:#FB7185;
+  --gold:#F5C451;
+  --disp:'Space Grotesk',system-ui,sans-serif;
+  --body:'Inter',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw}
+
+/* ---------- Top bar ---------- */
+header{flex:0 0 auto;padding:10px 16px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#0E1422,#0B0E14);z-index:20}
+.titles{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--disp);font-weight:700;font-size:18px;margin:0;letter-spacing:.2px}
+h1 .gear{color:var(--c-engine)}
+.sub{color:var(--muted);font-size:12px}
+.tag{font-family:var(--disp);font-size:10px;letter-spacing:1.5px;color:var(--c-engine);
+  border:1px solid var(--line);border-radius:999px;padding:2px 8px;text-transform:uppercase}
+.tag.intern{color:var(--c-us);border-color:#4a2230;background:#1a0f15}
+
+/* ---------- Controls ---------- */
+.controls{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:9px}
+.chip{font-family:var(--body);font-size:11.5px;color:var(--muted);background:var(--surface);
+  border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer;
+  white-space:nowrap;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.chip:hover{color:var(--ink);border-color:#3a4a6b}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex:0 0 auto}
+.chip.active{color:#08111e;font-weight:600}
+.chip[data-flow].active{background:var(--fc);border-color:var(--fc);color:#08111e}
+.chip.util{margin-left:auto}
+.chip.util.on{background:var(--c-engine);border-color:var(--c-engine);color:#08111e}
+.sep{width:1px;height:18px;background:var(--line);margin:0 2px}
+
+/* ---------- Stage ---------- */
+#stage{flex:1 1 auto;position:relative;overflow:hidden;cursor:grab;
+  background:
+    radial-gradient(1200px 700px at 70% -10%,#101a30 0%,transparent 60%),
+    radial-gradient(900px 600px at 10% 110%,#101630 0%,transparent 55%),
+    var(--bg)}
+#stage.grabbing{cursor:grabbing}
+#world{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+#wires{position:absolute;top:0;left:0;overflow:visible}
+
+/* ---------- Zone frames ---------- */
+.zone{position:absolute;border:1px solid var(--zc);border-radius:18px;
+  background:color-mix(in srgb,var(--zc) 7%, transparent);pointer-events:none}
+.zone .zlabel{position:absolute;top:-11px;left:16px;font-family:var(--disp);font-weight:600;
+  font-size:12px;letter-spacing:.5px;color:var(--zc);background:var(--bg);padding:0 8px;border-radius:6px}
+.zone .znote{position:absolute;bottom:8px;right:14px;font-size:10.5px;color:var(--muted);max-width:55%;text-align:right}
+
+/* ---------- Nodes ---------- */
+.node{position:absolute;border-radius:11px;background:var(--surface);
+  border:1px solid var(--line);border-left:3px solid var(--nc);
+  padding:7px 10px;cursor:pointer;transition:opacity .25s,box-shadow .15s,transform .1s;
+  box-shadow:0 1px 2px rgba(0,0,0,.4);user-select:none}
+.node:hover{box-shadow:0 0 0 1px var(--nc),0 6px 18px rgba(0,0,0,.5);z-index:5}
+.node:focus-visible{outline:2px solid var(--nc);outline-offset:2px}
+.node .nlabel{font-family:var(--disp);font-weight:600;font-size:12px;line-height:1.18;color:var(--ink)}
+.node .nmeta{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.2}
+.node.driver{background:linear-gradient(160deg,#1b2540,#10182c);border-left-width:0;border:1px solid var(--nc);
+  box-shadow:0 0 22px color-mix(in srgb,var(--nc) 40%,transparent)}
+.node.driver .nlabel{font-size:14px}
+.node.hub{background:linear-gradient(160deg,#1a2236,#121a2b);border-width:1px;border-color:color-mix(in srgb,var(--nc) 55%,var(--line))}
+.node.hub .nlabel{font-size:13px}
+.node.asset{background:repeating-linear-gradient(135deg,#16203a,#16203a 7px,#141d34 7px,#141d34 14px);
+  border-style:dashed;border-left-style:solid;font-style:normal}
+.node.group{border-style:dashed}
+.node .num{font-family:var(--disp);font-size:9px;color:var(--nc);font-weight:700;letter-spacing:1px}
+.node.dim{opacity:.12}
+.node.hot{box-shadow:0 0 0 2px var(--nc),0 0 26px color-mix(in srgb,var(--nc) 55%,transparent);z-index:6}
+
+/* wires */
+.wire{fill:none;stroke:var(--wc,#3a4660);stroke-width:1.6;opacity:.45;transition:opacity .25s,stroke-width .15s}
+.wire.dim{opacity:.05}
+.wire.hot{opacity:.95;stroke-width:2.4}
+.wire.money{stroke:var(--gold);stroke-dasharray:1 0}
+.wlabel{font-family:var(--body);font-size:9px;fill:var(--muted);opacity:0;transition:.2s}
+.wlabel.show{opacity:.85}
+.flowdot{fill:var(--fc,#7CC6FF)}
+.moneydot{font-family:var(--disp);font-size:12px;font-weight:700;fill:var(--gold)}
+
+/* gears (engine decor) */
+.gear path{fill:none;stroke:var(--c-engine);stroke-width:1.4;opacity:.18}
+.gear circle{fill:none;stroke:var(--c-engine);stroke-width:1.4;opacity:.18}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gear{transform-box:fill-box;transform-origin:center;animation:spin linear infinite}
+@media (prefers-reduced-motion:reduce){.gear{animation:none}}
+
+/* ---------- Detail panel ---------- */
+#panel{position:absolute;top:12px;right:12px;width:300px;max-width:calc(100vw - 24px);
+  background:rgba(14,19,30,.97);border:1px solid var(--line);border-radius:14px;
+  padding:14px 15px;z-index:30;display:none;backdrop-filter:blur(8px);
+  box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#panel.show{display:block}
+#panel .pclose{position:absolute;top:9px;right:11px;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+#panel .pkind{font-family:var(--disp);font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--pc)}
+#panel h3{font-family:var(--disp);margin:5px 0 8px;font-size:16px;color:var(--ink);padding-right:18px}
+#panel .pdesc{font-size:12.5px;color:#C3CDDD;line-height:1.5}
+#panel .prow{margin-top:10px;font-size:11.5px}
+#panel .prow b{color:var(--muted);font-weight:600;display:block;margin-bottom:3px;font-family:var(--disp);font-size:10px;letter-spacing:.5px;text-transform:uppercase}
+#panel .pill{display:inline-block;background:var(--surface2);border:1px solid var(--line);
+  border-radius:6px;padding:2px 7px;margin:2px 3px 0 0;font-size:11px;color:#D6DEEA;cursor:pointer}
+#panel .pill:hover{border-color:var(--pc)}
+#panel .pflow{display:inline-flex;align-items:center;gap:5px;margin:3px 7px 0 0;font-size:11px}
+#panel .pflow i{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* ---------- Legend / growth overlay ---------- */
+#legend{position:absolute;left:12px;bottom:12px;background:rgba(14,19,30,.92);border:1px solid var(--line);
+  border-radius:12px;padding:10px 12px;z-index:25;font-size:10.5px;color:var(--muted);max-width:240px}
+#legend b{font-family:var(--disp);color:var(--ink);font-size:10px;letter-spacing:.6px;display:block;margin-bottom:5px;text-transform:uppercase}
+.lg{display:flex;align-items:center;gap:7px;margin:3px 0}
+.lg .sw{width:14px;height:14px;border-radius:4px;flex:0 0 auto;border:1px solid var(--line)}
+.lg .swl{width:18px;height:3px;border-radius:2px}
+#legend .note{margin-top:8px;padding-top:7px;border-top:1px solid var(--line);color:#9fb0c6;line-height:1.4}
+
+#growth{position:absolute;inset:0;background:rgba(7,10,16,.78);backdrop-filter:blur(4px);
+  z-index:40;display:none;padding:34px;overflow:auto}
+#growth.show{display:block}
+.gcard{max-width:1080px;margin:0 auto;background:linear-gradient(160deg,#121a2c,#0d1320);
+  border:1px solid var(--line);border-radius:18px;padding:24px 26px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.gcard h2{font-family:var(--disp);margin:0 0 4px;font-size:20px;color:var(--gold)}
+.gcard .gsub{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.gbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+.gbox .ge{font-family:var(--disp);font-size:9.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--c-dist)}
+.gbox h4{font-family:var(--disp);margin:4px 0 7px;font-size:14px;color:var(--ink)}
+.gbox ul{margin:0;padding-left:16px;font-size:12px;color:#C3CDDD;line-height:1.55}
+.gbox.pillars .ge{color:var(--c-engine)} .gbox.assets .ge{color:var(--gold)}
+.gclose{position:absolute;top:16px;right:20px;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px}
+.gcard .tt{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.gcard .ttm{flex:1 1 220px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.gcard .ttm b{font-family:var(--disp);color:var(--c-cast);font-size:12px}
+.gcard .ttm span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+
+.hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:15;
+  font-size:10.5px;color:var(--muted);background:rgba(11,14,20,.7);border:1px solid var(--line);
+  border-radius:999px;padding:5px 13px;pointer-events:none}
+@media(max-width:720px){#legend{display:none}.sub{display:none}#panel{width:260px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="titles">
+      <h1><span class="gear">⚙</span> Cỗ máy Thương mại Hợp nhất — One Solution</h1>
+      <span class="sub">Affree · Lưu đồ thương mại · Cỗ máy Tăng trưởng · Core Tech — gộp thành một vòng tuần hoàn khép kín</span>
+      <span class="tag">v1.0</span>
+      <span class="tag intern">Internal</span>
+    </div>
+    <div class="controls" id="flowbar">
+      <span class="chip active" data-flow="all">Tất cả</span>
+      <span class="sep"></span>
+      <!-- flow chips injected -->
+      <span class="sep"></span>
+      <span class="chip util" id="btnGrowth">📈 Lăng kính Tăng trưởng</span>
+      <span class="chip" id="btnLock">🔓 Mở khoá</span>
+      <span class="chip" id="btnFit">⤢ Vừa màn hình</span>
+      <span class="chip" id="btnZoomIn">＋</span>
+      <span class="chip" id="btnZoomOut">－</span>
+      <span class="chip" id="btnSave">💾 Lưu vị trí</span>
+    </div>
+  </header>
+
+  <div id="stage">
+    <div id="world">
+      <svg id="wires" xmlns="http://www.w3.org/2000/svg"></svg>
+      <!-- zones + nodes injected as HTML -->
+    </div>
+    <div class="hint" id="hint">Rê chuột / kéo để di chuyển · lăn chuột để zoom · bấm một mắt xích để xem chi tiết · chọn LUỒNG để tô sáng tuyến</div>
+  </div>
+
+  <div id="panel">
+    <span class="pclose" id="pclose">×</span>
+    <div class="pkind" id="pkind"></div>
+    <h3 id="ptitle"></h3>
+    <div class="pdesc" id="pdesc"></div>
+    <div class="prow" id="pstats" style="display:none"><b>Số liệu / định danh</b><span id="pstatsv"></span></div>
+    <div class="prow" id="pfrom"><b>Nhận từ</b><span id="pfromv"></span></div>
+    <div class="prow" id="pto"><b>Đẩy tới</b><span id="ptov"></span></div>
+    <div class="prow" id="pflows"><b>Thuộc luồng</b><span id="pflowsv"></span></div>
+  </div>
+
+  <div id="legend">
+    <b>Chú giải</b>
+    <div class="lg"><span class="sw" style="background:linear-gradient(160deg,#1b2540,#10182c);border-color:var(--c-engine)"></span> Bánh chủ động (Core Tech cấp lực)</div>
+    <div class="lg"><span class="sw" style="background:#1a2236;border-color:var(--c-loi)"></span> Hub điều phối</div>
+    <div class="lg"><span class="sw" style="background:var(--surface)"></span> Mắt xích vận hành</div>
+    <div class="lg"><span class="sw" style="background:repeating-linear-gradient(135deg,#16203a,#16203a 4px,#141d34 4px,#141d34 8px);border-style:dashed"></span> Tài sản / ghi chú</div>
+    <div class="lg"><span class="swl" style="background:var(--gold)"></span> Dòng doanh thu 💰</div>
+    <div class="note"><b style="display:inline;color:var(--c-dist)">Day Sales đa vai:</b> một thực thể đóng 3 vai — kênh E.com · trục phân phối · điểm bán Plaza.</div>
+  </div>
+
+  <div id="growth">
+    <button class="gclose" id="gclose">Đóng ×</button>
+    <div class="gcard">
+      <h2>📈 Lăng kính Tăng trưởng &amp; Lợi nhuận</h2>
+      <div class="gsub">Cùng một cỗ máy, nhìn theo kết quả: 4 luồng doanh thu · 5 trụ cột cạnh tranh · tài sản tích luỹ.</div>
+      <div class="ggrid">
+        <div class="gbox"><div class="ge">Luồng I</div><h4>E.com — New Day &amp; BR</h4><ul><li>Day Sales (E.com)</li><li>Shopee (VN) · TikTok (VN)</li><li>Dịch vụ Phân phối (Phase 2)</li></ul></div>
+        <div class="gbox"><div class="ge">Luồng II</div><h4>Day Sales OMO — Sài Gòn</h4><ul><li>5 khu: Trung Tâm · Bắc · Nam · Đông · Tây</li><li>Online-Merge-Offline tại điểm</li></ul></div>
+        <div class="gbox"><div class="ge">Luồng III</div><h4>Dịch vụ số — Core Competency</h4><ul><li>Nhạc số bản quyền</li><li>Thương mại từ YouTube (Affiliate · Store)</li><li>Growth Hacking &amp; Digital MKT</li></ul></div>
+        <div class="gbox"><div class="ge">Luồng IV</div><h4>Dịch vụ số — Core Tech &amp; Tech Model</h4><ul><li>SaaS từ One Solution</li><li>Tech Model Licensing</li><li>Technology Transfer</li></ul></div>
+      </div>
+      <div style="margin-top:14px"></div>
+      <div class="gbox pillars" style="margin-bottom:14px"><div class="ge">Tech Transfer — 3 mô hình hợp tác (DN 30–100 tỷ/năm)</div>
+        <div class="tt">
+          <div class="ttm"><b>MH1 · SaaS + Managed</b><span>One Solution vận hành trọn gói — đối tác không cần đội kỹ thuật.</span></div>
+          <div class="ttm"><b>MH2 · Chuyển giao công nghệ ⭐</b><span>Bàn giao source + cấu trúc data; đối tác sở hữu trọn đời (mặc định đề xuất).</span></div>
+          <div class="ttm"><b>MH3 · JV / Chia doanh thu</b><span>OS góp tech + platform; đối tác góp nhãn + đại lý + vốn.</span></div>
+        </div>
+      </div>
+      <div class="ggrid">
+        <div class="gbox pillars"><div class="ge">5 trụ cột cạnh tranh</div><h4>Vai trò Cỗ máy</h4><ul><li>Core Tech</li><li>Tech Model</li><li>Business Model</li><li>Core Competency</li><li>Know-How: Automated Trade Promotion Engine · Multi-Brand Trade MKT · Multi-SKU Trade Optimization</li></ul></div>
+        <div class="gbox assets"><div class="ge">Tài sản tích luỹ</div><h4>Tệp khách 7 chuyên trang</h4><ul><li>Cửa ngõ: Tươi Xanh Nhanh Ngon (tần suất cao nhất)</li><li>Đỉnh giá trị: Chuyên Sỉ B2B</li><li>3 lớp synergy: chuỗi phân phối · gia đình VN · cấp cam kết</li><li>Data flywheel: mỗi lần Chạm + mỗi giao dịch nuôi MLBL</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA — nodes / zones / edges / flows  (mode INTERNAL)
+   ============================================================ */
+const FLOWS=[
+  {id:"f_capital",label:"Dòng vốn → Sản xuất",c:"#6AA6FF"},
+  {id:"f_tech",   label:"Công nghệ cấp lực",   c:"#8B9CFF"},
+  {id:"f_dist",   label:"Phân phối · 7 chuyên trang",c:"#19C2AC"},
+  {id:"f_yt",     label:"Phát tán YouTube",     c:"#FF4D4D"},
+  {id:"f_fb",     label:"Phát tán Facebook",    c:"#5E7CE2"},
+  {id:"f_tt",     label:"Phát tán TikTok",      c:"#25D2C8"},
+  {id:"f_funnel", label:"Phễu & Hồi quy",       c:"#B57BFF"},
+  {id:"f_rev",    label:"Doanh thu → Lõi",      c:"#F5C451"},
+  {id:"f_us",     label:"Mở rộng Mỹ",           c:"#FB7185"},
+  {id:"f_affree", label:"Affree & vertical",    c:"#38BDF8"},
+];
+const ZC={loi:"#5B8DEF",dist:"#19C2AC",cast:"#E8973A",funnel:"#B57BFF",rev:"#EAB308",engine:"#818CF8",affree:"#22D3EE",us:"#FB7185"};
+
+const ZONES=[
+  {label:"🏢 LÕI VẬN HÀNH",        x:300,y:60,  w:1180,h:400, c:ZC.loi,   note:"Vốn → hàng + nội dung → sản xuất AI → chuẩn hoá tại One Solution"},
+  {label:"🚚 PHÂN PHỐI & 7 CHUYÊN TRANG",x:300,y:478,w:1180,h:242, c:ZC.dist, note:"2 trục Day Sales / Day Sales OMO · 7 chuyên trang · 3 lớp synergy"},
+  {label:"📡 PHÁT TÁN & KHÚC CHẠM",x:300,y:740, w:1180,h:222, c:ZC.cast,  note:"3 kênh (GCC · Meta · TTS API) → 5 điểm bán Plaza"},
+  {label:"🔁 PHỄU & HỒI QUY",      x:300,y:982, w:1180,h:320, c:ZC.funnel,note:"NFC Chạm–Chọn–Nhận + RCS/MMS → Tệp → hồi quy · phủ logic Thương Mại Chính Xác"},
+  {label:"💰 DOANH THU → LÕI",     x:300,y:1322,w:1180,h:236, c:ZC.rev,   note:"8 túi tiền → rev_hub → One Solution → tái đầu tư"},
+  {label:"⚙️ ENGINE ROOM — NỀN MÓNG CÔNG NGHỆ (cấp lực mọi tầng)",x:90,y:1582,w:1720,h:548,c:ZC.engine,note:"Canadisign (IP) → One Solution · MSAS × Mạng xe × NFC × Tệp"},
+  {label:"🛒 AFFREE — SÀN MỞ · NGƯỜI MUA ↔ NGƯỜI BÁN", x:30,y:556,w:474,h:828, c:ZC.affree, aff:true, note:"Cung từ khắp nơi (third-party, KHÔNG thuộc One Solution) · VN + US/CA"},
+  {label:"CUNG · third-party (khắp nơi)", x:42,y:600,w:202,h:254, c:ZC.affree, aff:true, note:""},
+  {label:"CẦU · người mua",               x:42,y:902,w:202,h:134, c:ZC.affree, aff:true, note:""},
+  {label:"🇺🇸 MỞ RỘNG MỸ",         x:1540,y:400,w:262,h:512, c:ZC.us,   note:""},
+];
+
+// role: driver | hub | group | input | asset | driven | front | market | money | vertical
+const N=[
+ // ---- LÕI ----
+ {id:"inv",z:"loi",role:"input",x:900,y:96,w:236,h:54,t:"QUỸ ĐẦU TƯ",m:"Mr. Công · Mr. Việt",
+   d:"Nguồn vốn & năng lực sáng lập (Phan Quốc Công – Phan Hồng Việt). Cấp lực cho hai kho lõi; nhận lại dòng tái đầu tư từ One Solution."},
+ {id:"kho_hang",z:"loi",role:"driven",x:560,y:188,w:150,h:46,t:"KHO HÀNG",d:"Kho hàng hoá — đầu vào của nhóm Product."},
+ {id:"kho_nhac",z:"loi",role:"driven",x:1240,y:188,w:150,h:46,t:"KHO NHẠC",d:"Kho tài sản nội dung (âm nhạc/IP) — đầu vào của nhóm Content."},
+ {id:"product",z:"loi",role:"group",x:470,y:286,w:180,h:52,t:"PRODUCT",m:"Brand 1 · 2 · n",d:"Nhóm thương hiệu (mở rộng được). Đẩy thẳng vào One Solution để chuẩn hoá thành sản phẩm phân phối."},
+ {id:"content",z:"loi",role:"group",x:1150,y:286,w:170,h:52,t:"CONTENT",m:"Content 1 · 2 · n",d:"Kho nội dung. Đi qua Tác giả (gắn quyền tác giả) trước khi vào sản xuất."},
+ {id:"tacgia",z:"loi",role:"driven",x:1342,y:286,w:184,h:52,t:"TÁC GIẢ",m:"Vincent Phan · Author X·Y·n",d:"Gắn quyền tác giả lên nội dung trước khi đưa vào One AI Production."},
+ {id:"one_ai",z:"loi",role:"hub",x:770,y:300,w:206,h:58,t:"ONE AI PRODUCTION",m:"xưởng sản xuất AI",
+   d:"Đòn bẩy nhân bản nội dung chi phí thấp. Là nguồn phát cho: 3 kênh phát tán, One Touch (quốc tế) và nối thẳng vào phễu RCS/MMS (tệp Đàn Ông Đích Thực)."},
+ {id:"one_solution",z:"loi",role:"driver",x:900,y:424,w:248,h:64,t:"ONE SOLUTION",m:"trung tâm điều phối + thu tiền",
+   d:"Hợp nhất hàng hoá (Product) và nội dung (Content) thành sản phẩm phân phối; đẩy xuống 2 trục Day Sales / Day Sales OMO. TOÀN BỘ doanh thu cuối cùng dồn về đây rồi tái đầu tư."},
+
+ // ---- PHÂN PHỐI ----
+ {id:"day_sales",z:"dist",role:"hub",x:620,y:524,w:188,h:54,t:"DAY SALES",m:"trục bán lẻ OMO (đa vai)",
+   d:"Thực thể ĐA VAI: (1) kênh E.com, (2) trục phân phối, (3) điểm bán Plaza dùng chung. App bán lẻ OMO của One Solution; nhận hồi quy từ Tệp Day Sales – Plaza."},
+ {id:"day_sales_omo",z:"dist",role:"hub",x:1120,y:524,w:206,h:54,t:"DAY SALES OMO",m:"vận hành theo tệp khách",
+   d:"Phân khúc tệp để cá nhân hoá chào bán; nhận hồi quy 3 nhóm tệp (B2B · Đàn Ông · Phái Đẹp) và kết nối ngược từ vùng Mỹ."},
+ {id:"ct01",z:"dist",role:"driven",x:360,y:632,w:152,h:58,t:"Tươi Xanh Nhanh Ngon",m:"01 · OMO · cửa ngõ",d:"Hộ gia đình/nội trợ — thực phẩm tươi + HPC. Tần suất 20–30 lần/tháng (cao nhất 7 chuyên trang) → cửa ngõ dữ liệu cho Thương Mại Chính Xác."},
+ {id:"ct02",z:"dist",role:"driven",x:524,y:632,w:152,h:58,t:"MLBL – Hàng Thiết Yếu",m:"02 · OMO B2B",d:"Chủ tạp hoá, cơ sở KD — HPC chính hãng."},
+ {id:"ct03",z:"dist",role:"driven",x:688,y:632,w:152,h:58,t:"MLBL – Nhãn Quốc Dân",m:"03 · OMO B2B",d:"Chủ tạp hoá nâng tầm — nhãn quốc dân đa quốc gia."},
+ {id:"ct04",z:"dist",role:"driven",x:852,y:632,w:152,h:58,t:"Tề Gia Nội Trợ",m:"04 · OMO",d:"Mẹ bỉm, mẹ bầu, HGĐ trẻ — Mẹ & Bé + chăm sóc gia đình."},
+ {id:"ct05",z:"dist",role:"driven",x:1016,y:632,w:152,h:58,t:"Đàn Ông Đích Thực",m:"05 · Online thuần",d:"Nam 18–45 — chăm sóc nam · tech · lifestyle. KOL/KOC, livestream, affiliate."},
+ {id:"ct06",z:"dist",role:"driven",x:1180,y:632,w:152,h:58,t:"Thế Giới Phái Đẹp",m:"06 · Online thuần",d:"Nữ 18–45 — làm đẹp · thời trang · phụ kiện."},
+ {id:"ct07",z:"dist",role:"driven",x:1344,y:632,w:152,h:58,t:"MLBL – Chuyên Sỉ B2B",m:"07 · OMO + Online · đỉnh",d:"Đại lý, NPP khu vực — HPC sỉ đa ngành. Doanh thu khối lượng cao + biên hấp dẫn nhất + cam kết dài hạn."},
+
+ // ---- PHÁT TÁN ----
+ {id:"yt",z:"cast",role:"driven",x:640,y:784,w:160,h:52,t:"YOUTUBE",m:"kênh Khúc Chạm",d:"Kênh phát tán. Gắn Google Cloud Console API (GCC) — đường dẫn tạo tiền hồi quy về Youtube Store + Plaza dùng chung."},
+ {id:"fb",z:"cast",role:"driven",x:880,y:784,w:160,h:52,t:"FACEBOOK",m:"kênh Khúc Chạm",d:"Kênh phát tán. Gắn Meta Developer API — dẫn về Facebook Store + Plaza dùng chung."},
+ {id:"tt",z:"cast",role:"driven",x:1120,y:784,w:160,h:52,t:"TIKTOK",m:"kênh Khúc Chạm",d:"Kênh phát tán. Gắn Tiktok Shop API (TTS) — dẫn về Tiktok Shop + Plaza dùng chung."},
+ {id:"yt_store",z:"cast",role:"driven",x:470,y:902,w:150,h:48,t:"Youtube Store",m:"điểm bán",d:"Nhận từ GCC API. Nguồn thu: bán hàng + Affiliate."},
+ {id:"day_sales_pt",z:"cast",role:"driven",x:680,y:902,w:160,h:48,t:"Day Sales",m:"điểm bán · Plaza dùng chung",d:"Điểm bán xương sống (vai 3 của Day Sales). Nhận từ cả 3 API; đẩy vào cả 2 khối phễu (NFC + RCS/MMS)."},
+ {id:"shopee",z:"cast",role:"driven",x:890,y:902,w:150,h:48,t:"Shopee",m:"điểm bán · Plaza dùng chung",d:"Sàn TMĐT dùng chung. Nhận từ cả 3 API; hiện đẩy vào khối phễu NFC."},
+ {id:"fb_store",z:"cast",role:"driven",x:1090,y:902,w:160,h:48,t:"Facebook Store",m:"điểm bán",d:"Nhận từ Meta API; đẩy vào phễu NFC + RCS/MMS."},
+ {id:"tt_shop",z:"cast",role:"driven",x:1300,y:902,w:150,h:48,t:"Tiktok Shop",m:"điểm bán",d:"Nhận từ TTS API; đẩy vào phễu NFC + RCS/MMS."},
+
+ // ---- PHỄU & TỆP ----
+ {id:"funnel_nfc",z:"funnel",role:"hub",x:650,y:1062,w:212,h:60,t:"Phễu NFC Album Nhạc",m:"Chạm – Chọn – Nhận",
+   d:"Thẻ NFC album nhạc (có quyền tác giả) + thẻ mua hàng ưu tiên KÈM gói giao hàng. Khách chạm điện thoại → mở trang đặt hàng cá nhân hoá trong một giây."},
+ {id:"funnel_rcs",z:"funnel",role:"hub",x:1120,y:1062,w:212,h:60,t:"Phễu RCS / MMS",m:"daySales · định danh A05",
+   d:"Gom số điện thoại đã thu → gửi tin RCS/MMS brand-verified (không bị filter spam) → tạo tệp khách. One AI Production nối thẳng vào đây."},
+ {id:"tmcx",z:"funnel",role:"asset",x:885,y:1172,w:234,h:48,t:"Thương Mại Chính Xác · 4 bước",
+   d:"Logic phủ lên vòng phễu: 1·Dự báo (chu kỳ mua) → 2·Kích hoạt (daySales MMS/RCS) → 3·Chốt đơn (NFC + định danh) → 4·Giao 15 phút (MSAS + xe điện). Đối thủ khó sao chép ngắn hạn."},
+ {id:"tep_plaza",z:"funnel",role:"group",x:650,y:1234,w:212,h:50,t:"Tệp Day Sales – Plaza",d:"Tệp khách gom từ phễu → hồi quy về trục DAY SALES."},
+ {id:"tep_3",z:"funnel",role:"group",x:1120,y:1234,w:252,h:50,t:"Tệp: B2B · Đàn Ông · Phái Đẹp",d:"3 nhóm tệp (tập con của 7 chuyên trang) → hồi quy về DAY SALES OMO."},
+
+ // ---- DOANH THU ----
+ {id:"bag_yt",z:"rev",role:"money",x:470,y:1362,w:120,h:40,t:"💰 YouTube",m:"YPP …",d:"Túi tiền kênh YouTube — Youtube Partner Program (nguồn thu kênh FB/TikTok còn để trống — sắp bổ sung)."},
+ {id:"bag_fb",z:"rev",role:"money",x:600,y:1362,w:120,h:40,t:"💰 Facebook",m:"Content Monetization",d:"Túi tiền kênh Facebook — Facebook Content Monetization."},
+ {id:"bag_tt",z:"rev",role:"money",x:730,y:1362,w:120,h:40,t:"💰 TikTok",m:"…",d:"Túi tiền kênh TikTok — nguồn thu chưa điền (sắp bổ sung)."},
+ {id:"bag_ytstore",z:"rev",role:"money",x:860,y:1362,w:120,h:40,t:"💰 YT Store",m:"bán + Affiliate",d:"Túi tiền Youtube Store."},
+ {id:"bag_ds",z:"rev",role:"money",x:990,y:1362,w:120,h:40,t:"💰 Day Sales",m:"bán + DV phân phối",d:"Túi tiền Day Sales — bán hàng BR·MC·AC + Dịch vụ Phân phối (ký trực tiếp với nhãn · affiliate của affiliate)."},
+ {id:"bag_shopee",z:"rev",role:"money",x:1120,y:1362,w:120,h:40,t:"💰 Shopee",m:"BR·MC·AC·KM",d:"Túi tiền Shopee."},
+ {id:"bag_fbstore",z:"rev",role:"money",x:1250,y:1362,w:120,h:40,t:"💰 FB Store",m:"BR·MC·AC·KM",d:"Túi tiền Facebook Store."},
+ {id:"bag_ttshop",z:"rev",role:"money",x:1380,y:1362,w:120,h:40,t:"💰 TT Shop",m:"BR·MC·AC·KM",d:"Túi tiền Tiktok Shop."},
+ {id:"rev_hub",z:"rev",role:"driver",x:900,y:1482,w:280,h:58,t:"DOANH THU — GOM VỀ ONE SOLUTION",m:"rev_hub · 8 làn song song",
+   d:"Trục gom 8 túi tiền (3 kênh + 5 điểm bán) thành một mối, kèm hoạt ảnh $ trôi, đổ về One Solution để tái đầu tư."},
+
+ // ---- ENGINE ROOM ----
+ {id:"canadisign",z:"engine",role:"asset",x:380,y:1632,w:240,h:62,t:"Canadisign Tech Solutions Corp.",m:"Canada · TECH OWNER + IP",
+   d:"Sở hữu Map Server, API Server, Database, IP. Đại diện pháp nhân: Phan Quốc Công. License/authorization cho One Solution (implementer).",
+   stats:"7,341% CP One Solution (1.125.000 CP). ⚠ Hợp đồng license & quyền sub-license Tech Transfer — cần HĐQT xác nhận."},
+ {id:"msas",z:"engine",role:"driver",x:900,y:1716,w:300,h:92,t:"MSAS — Map Server & API Server",m:"Core Tech · Trụ Cột 1",
+   d:"Nền tảng GIS đô thị: bản đồ chi tiết đến ngõ hẻm + số nhà. 4 năng lực (lot lookup · geocoding · routing · nearby/POI), 4 nhóm API, 16 lớp thông tin/lô. Bộ não điều hướng – định vị – định danh.",
+   stats:"HCMC 1.883.447 lô + 539.817 CSKD · HN 1.614.099 lô · 53/63 tỉnh có CSKD · tổng ~3,5tr lô + 581.794 CSKD · ~33 endpoint tài liệu hoá / ~180 API production."},
+ {id:"osai_mlbl",z:"engine",role:"asset",x:560,y:1856,w:194,h:58,t:"OS-AI → MLBL",m:"Mua Lợi Bán Lời · Trade Marketing",
+   d:"Layer TRÊN Core Tech. Mua Lợi = tối ưu giá vào (so giá + KM đa nhãn). Bán Lời = bán chéo/tăng giỏ. Đồng thời là affiliate nội bộ đa nhãn — thuộc tính mặc định mọi giao dịch 7 chuyên trang."},
+ {id:"nfc",z:"engine",role:"asset",x:772,y:1856,w:150,h:58,t:"NFC Chạm",m:"Trụ Cột 3",
+   d:"Định danh nhân viên (hoa hồng minh bạch) · dữ liệu KH cá nhân hoá · Khoảnh khắc Merge: chạm 1 giây thay cho tải app + đăng ký + đăng nhập (giảm 50–70% bỏ cuộc). Data flywheel khó phá."},
+ {id:"daysales_id",z:"engine",role:"asset",x:962,y:1856,w:180,h:58,t:"daySales — định danh A05",m:"MMS / RCS",
+   d:"Quyền nhắn tin trực tiếp end-user qua MMS & RCS brand-verified (không bị filter spam, không phụ thuộc OTT bên thứ 3). Đóng kín bước 2 của Thương Mại Chính Xác.",
+   stats:"GCN 260552/A05-TĐD · Cục A05 – Bộ Công An · 02/04/2026 → 01/04/2029 · pháp nhân One Solution (MST 0313759620)."},
+ {id:"odoo",z:"engine",role:"asset",x:380,y:1856,w:150,h:52,t:"Odoo ERP",m:"custom → tài sản",d:"ERP đã custom thành tài sản công nghệ của One Solution — hạ tầng vận hành, 1 trong 3 yếu tố bắt buộc của THXL 5.0."},
+ {id:"xe",z:"engine",role:"asset",x:1180,y:1856,w:180,h:58,t:"Mạng lưới xe điện",m:"Trụ Cột 2 · 15 phút",d:"Tài sản hữu hình: xe máy điện + xe van + quy trình + nhân lực OMO offline. Cơ thể vật lý, last-mile giao 15 phút."},
+ {id:"thxl",z:"engine",role:"asset",x:1420,y:1716,w:184,h:60,t:"THXL 5.0",m:"Tạp Hoá Xe Lam 5.0",d:"Kênh phân phối OMO — 2 nhánh: Offline+Merge (xe điện + NFC) và Online (S.com — KOL/KOC). Lực lượng sale OMO."},
+ {id:"formula",z:"engine",role:"asset",x:900,y:1980,w:392,h:62,t:"CÔNG THỨC 3 TRỤ CỘT",m:"MSAS × Mạng xe × NFC × Tệp 7 chuyên trang",
+   d:"Định giá hệ sinh thái = tài sản NHÂN nhau, không cộng rời rạc. Thiếu 1 trong 3 trụ → hai trụ còn lại mất phần lớn giá trị (không MSAS → đội xe thành ship thường; không xe → mất 5/7 chuyên trang; không NFC → mất Merge moment)."},
+ {id:"goollow",z:"engine",role:"vertical",x:470,y:2060,w:170,h:46,t:"Goollow68",m:"gồm DayGo68",d:"Vertical product RIÊNG — cổng tra cứu dịch vụ/địa điểm + danh bạ CSKD. Dùng API Group 3+4, chung MSAS nhưng tách biệt Day Sales."},
+ {id:"homeinfo",z:"engine",role:"vertical",x:680,y:2060,w:170,h:46,t:"HomeInfo68",m:"định giá BĐS kép",d:"Vertical Group 01 (Real Estate) — tra cứu lô/quy hoạch/lộ giới/hướng + định giá kép (AI–Big Data / thông lệ Ngân hàng). Chung MSAS, tách Day Sales."},
+ {id:"housecons",z:"engine",role:"vertical",x:890,y:2060,w:182,h:46,t:"HouseCons68",m:"quy hoạch + dự toán XD + phong thủy",d:"Vertical Group 01+02 — anh em HomeInfo68 (chung place-id). Tra QMXD + dự toán chi phí xây dựng (engine đơn giá nội bộ) + phong thủy."},
+
+ // ---- AFFREE — SÀN MỞ (cung third-party ↔ cầu người mua) ----
+ // CUNG — third-party, từ khắp nơi (KHÔNG phải tài sản One Solution)
+ {id:"aff_brands",z:"affree",role:"front",x:143,y:640,w:184,h:50,t:"Nhãn hàng",m:"BR · KM · Mencode · Aloclean · PNJ · …",
+   d:"Hàng nghìn NHÃN HÀNG tự listing lên sàn — KHÔNG thuộc One Solution, kéo về từ khắp nơi (VN + toàn cầu)."},
+ {id:"aff_stores",z:"affree",role:"front",x:143,y:706,w:184,h:50,t:"Cửa hàng",m:"BHX · CircleK · 7-Eleven · tạp hoá VN & quốc tế",
+   d:"Cửa hàng / chuỗi / điểm bán bên thứ ba đưa hàng lên sàn — siêu thị mini, chuỗi tiện lợi, tạp hoá trong và ngoài Việt Nam."},
+ {id:"aff_services",z:"affree",role:"front",x:143,y:776,w:184,h:54,t:"Dịch vụ đính kèm",m:"giao · lắp đặt · bảo hành · tài chính · …",
+   d:"Nhà cung cấp DỊCH VỤ bên thứ ba gắn kèm giao dịch: giao vận, lắp đặt, bảo hành, thanh toán/tài chính, định giá, xây dựng…"},
+ // CẦU
+ {id:"aff_buyers",z:"affree",role:"front",x:143,y:958,w:184,h:54,t:"Người mua",m:"VN + US/CA",
+   d:"Phía CẦU — người mua / người cần dịch vụ, trong nước và quốc tế. Affree khớp họ tới đúng nguồn cung."},
+ // CÔNG NGHỆ KẾT NỐI — lõi sàn Affree
+ {id:"aff_intake",z:"affree",role:"driven",x:392,y:640,w:196,h:56,t:"Sàn Listing — Universal Catalog",m:"mọi nhãn · cửa hàng · dịch vụ · sản phẩm/combo · nhạc",
+   d:"Nơi MỌI cung được listing lên để người mua mua được: nhãn hàng + cửa hàng + dịch vụ bên thứ ba (khắp nơi) + sản phẩm và túi combo MLBL (đơn · đôi ghép · đa dạng) của 7 chuyên trang + tính năng HomeInfo68/HouseCons68/Goollow68 + album nhạc bản quyền. Phủ VN + US/CA, chi phí biên ~0."},
+ {id:"affree",z:"affree",role:"hub",x:392,y:754,w:204,h:70,t:"AFFREE — CÔNG NGHỆ KẾT NỐI",m:"khớp người mua ↔ người bán · From FREE → FEE",
+   d:"Lõi công nghệ HAI PHÍA (asset-light — KHÔNG ôm kho, KHÔNG sở hữu cung): khớp đúng người mua với đúng nhãn hàng / cửa hàng / dịch vụ từ khắp nơi. Người mua dùng MIỄN PHÍ. Vừa độc lập, vừa nối Day-Sales · Affree cross-border · Khúc Chạm; biến người dùng FREE thành giao dịch FEE."},
+ {id:"aff_ledger",z:"affree",role:"driven",x:392,y:914,w:196,h:50,t:"Ghi nhận giao dịch",m:"thành công / thất bại",
+   d:"Mỗi yêu cầu mua / lần AI đặt hộ được ghi nhận KẾT QUẢ (thành/bại, ở nguồn nào, vì sao). Cảm biến hiệu quả + dữ liệu gốc cho đề xuất."},
+ {id:"aff_propose",z:"affree",role:"driven",x:392,y:1012,w:196,h:56,t:"Đề xuất đúng người – đúng dịch vụ",m:"matching engine",
+   d:"Từ dữ liệu giao dịch + hành vi: ai cần gì → propose nhãn / cửa hàng / dịch vụ tương ứng cho đúng người mua. Càng nhiều giao dịch → đề xuất càng trúng."},
+ {id:"aff_fee",z:"affree",role:"asset",x:392,y:1150,w:204,h:60,grad:"linear-gradient(100deg,#0e2a33 0%,#16384a 45%,#5a4a1e 80%,#7a5e16 100%)",t:"From FREE → FEE",m:"Hiển thị → Lead/Dữ liệu → Hoa hồng",
+   d:"Doanh thu KHÔNG từ người mua mà từ phía cung: Hiển thị (ưu tiên/tài trợ) → Lead & Dữ liệu → Giao dịch agentic (hoa hồng mỗi đơn AI hoàn tất). Mỗi giao dịch thành công = một điểm FEE → đổ về doanh thu lõi. Công nghệ đi ZERO → HERO."},
+
+ // ---- MỸ ----
+ {id:"one_touch",z:"us",role:"hub",x:1655,y:452,w:170,h:48,t:"ONE TOUCH",m:"bệ phóng quốc tế",d:"Điểm chạm mở rộng — đưa sản phẩm/nội dung AI ra thị trường Mỹ qua các nền tảng số toàn cầu."},
+ {id:"amazon",z:"us",role:"market",x:1655,y:540,w:150,h:38,t:"Amazon",d:"Hàng hoá tại Mỹ."},
+ {id:"ytus",z:"us",role:"market",x:1655,y:592,w:150,h:38,t:"YouTube US",d:"Nội dung/nhạc tại Mỹ."},
+ {id:"spotify",z:"us",role:"market",x:1655,y:644,w:150,h:38,t:"Spotify",d:"Nhạc bản quyền tại Mỹ."},
+ {id:"shopify",z:"us",role:"market",x:1655,y:696,w:150,h:38,t:"Shopify",d:"Thương mại tại Mỹ."},
+ {id:"digitn",z:"us",role:"market",x:1655,y:748,w:150,h:38,t:"Digital Platform n",d:"Mở rộng thêm nền tảng số."},
+ {id:"affree_us",z:"us",role:"front",x:1655,y:822,w:172,h:46,t:"Affree cross-border",m:"USD · astrabean",d:"Affree bản xuyên biên giới — người Việt ở Mỹ/Canada mua hàng Việt hoặc mua hộ gửi về; đa tiền tệ (USD). Ví dụ thực: astrabean (PHIN LAB, San Jose)."},
+];
+
+// edges: [from, to, flows[], opts{label,money,bidir,bow,dash}]
+const E=[
+ // capital
+ ["inv","kho_hang",["f_capital"]],["inv","kho_nhac",["f_capital"]],
+ ["kho_hang","product",["f_capital"]],["kho_nhac","content",["f_capital"]],
+ ["content","tacgia",["f_capital"]],["tacgia","one_ai",["f_capital"]],
+ ["product","one_solution",["f_capital"]],["one_ai","one_solution",["f_capital"]],
+ // distribution
+ ["one_solution","day_sales",["f_dist"]],["one_solution","day_sales_omo",["f_dist"]],
+ ["day_sales_omo","ct01",["f_dist"]],["day_sales_omo","ct02",["f_dist"]],["day_sales_omo","ct03",["f_dist"]],
+ ["day_sales_omo","ct04",["f_dist"]],["day_sales_omo","ct07",["f_dist"]],
+ ["day_sales","ct05",["f_dist"]],["day_sales","ct06",["f_dist"]],
+ // broadcast
+ ["one_ai","yt",["f_yt"]],["one_ai","fb",["f_fb"]],["one_ai","tt",["f_tt"]],
+ ["yt","yt_store",["f_yt"],{label:"GCC API"}],["yt","day_sales_pt",["f_yt"]],["yt","shopee",["f_yt"]],
+ ["fb","fb_store",["f_fb"],{label:"Meta API"}],["fb","day_sales_pt",["f_fb"]],["fb","shopee",["f_fb"]],
+ ["tt","tt_shop",["f_tt"],{label:"TTS API"}],["tt","day_sales_pt",["f_tt"]],["tt","shopee",["f_tt"]],
+ // funnel in
+ ["day_sales_pt","funnel_nfc",["f_funnel"]],["day_sales_pt","funnel_rcs",["f_funnel"]],
+ ["shopee","funnel_nfc",["f_funnel"]],
+ ["fb_store","funnel_nfc",["f_funnel"]],["fb_store","funnel_rcs",["f_funnel"]],
+ ["tt_shop","funnel_nfc",["f_funnel"]],["tt_shop","funnel_rcs",["f_funnel"]],
+ ["yt_store","funnel_nfc",["f_funnel"],{dash:1}],
+ ["one_ai","funnel_rcs",["f_funnel"],{dash:1,bow:520,label:"nội dung RCS"}],
+ ["tmcx","funnel_rcs",["f_funnel"],{dash:1}],
+ // funnel out
+ ["funnel_nfc","tep_plaza",["f_funnel"]],["funnel_nfc","tep_3",["f_funnel"]],
+ ["funnel_rcs","tep_plaza",["f_funnel"]],["funnel_rcs","tep_3",["f_funnel"]],
+ // regression loop up
+ ["tep_plaza","day_sales",["f_funnel"],{bow:-360,label:"hồi quy"}],
+ ["tep_3","day_sales_omo",["f_funnel"],{bow:380,label:"hồi quy"}],
+ // revenue
+ ["yt","bag_yt",["f_rev"],{money:1}],["fb","bag_fb",["f_rev"],{money:1}],["tt","bag_tt",["f_rev"],{money:1}],
+ ["yt_store","bag_ytstore",["f_rev"],{money:1}],["day_sales_pt","bag_ds",["f_rev"],{money:1}],
+ ["shopee","bag_shopee",["f_rev"],{money:1}],["fb_store","bag_fbstore",["f_rev"],{money:1}],["tt_shop","bag_ttshop",["f_rev"],{money:1}],
+ ["bag_yt","rev_hub",["f_rev"],{money:1}],["bag_fb","rev_hub",["f_rev"],{money:1}],["bag_tt","rev_hub",["f_rev"],{money:1}],
+ ["bag_ytstore","rev_hub",["f_rev"],{money:1}],["bag_ds","rev_hub",["f_rev"],{money:1}],["bag_shopee","rev_hub",["f_rev"],{money:1}],
+ ["bag_fbstore","rev_hub",["f_rev"],{money:1}],["bag_ttshop","rev_hub",["f_rev"],{money:1}],
+ ["rev_hub","one_solution",["f_rev"],{money:1,bow:560,label:"gom về lõi"}],
+ ["one_solution","inv",["f_rev"],{money:1,bow:-680,label:"tái đầu tư"}],
+ // tech powers everything
+ ["canadisign","one_solution",["f_tech"],{dash:1,bow:-300,label:"license"}],
+ ["msas","one_solution",["f_tech"],{bow:300}],
+ ["msas","day_sales",["f_tech"],{dash:1,bow:-260}],
+ ["msas","affree",["f_tech"],{dash:1,bow:-560}],
+ ["msas","goollow",["f_tech"],{dash:1}],["msas","homeinfo",["f_tech"],{dash:1}],["msas","housecons",["f_tech"],{dash:1}],
+ ["nfc","funnel_nfc",["f_tech"],{dash:1,bow:-120,label:"Chạm–Chọn–Nhận"}],
+ ["daysales_id","funnel_rcs",["f_tech"],{dash:1,bow:120,label:"MMS/RCS"}],
+ ["osai_mlbl","day_sales_omo",["f_tech"],{dash:1,bow:-200,label:"MLBL"}],
+ ["xe","day_sales_omo",["f_tech"],{dash:1,bow:240,label:"15'"}],
+ ["thxl","day_sales_omo",["f_tech"],{dash:1,bow:300}],
+ ["formula","msas",["f_tech"],{dash:1}],
+ // affree — CUNG third-party listing lên sàn
+ ["aff_brands","aff_intake",["f_affree"],{label:"listing nhãn"}],
+ ["aff_stores","aff_intake",["f_affree"],{label:"listing cửa hàng"}],
+ ["aff_services","aff_intake",["f_affree"]],
+ // hệ One Solution cũng listing lên Affree
+ ["goollow","aff_intake",["f_affree"],{dash:1,label:"tính năng dịch vụ"}],
+ ["homeinfo","aff_intake",["f_affree"],{dash:1}],
+ ["housecons","aff_intake",["f_affree"],{dash:1}],
+ ["day_sales_omo","aff_intake",["f_affree"],{dash:1,label:"sản phẩm + túi combo MLBL"}],
+ ["content","aff_intake",["f_affree"],{dash:1,label:"album nhạc bản quyền"}],
+ // công nghệ kết nối: cung → catalog → hub ↔ người mua → đề xuất → FEE
+ ["aff_intake","affree",["f_affree"]],
+ ["aff_buyers","affree",["f_affree"],{bidir:1,label:"khớp mua ↔ bán"}],
+ ["affree","aff_ledger",["f_affree"]],
+ ["aff_ledger","aff_propose",["f_affree"],{label:"dữ liệu ✓/✗"}],
+ ["aff_propose","aff_buyers",["f_affree"],{bow:-60,label:"đề xuất"}],
+ ["aff_propose","aff_intake",["f_affree"],{dash:1,bow:120,label:"chọn nguồn cung"}],
+ ["affree","aff_fee",["f_affree"]],
+ ["aff_fee","rev_hub",["f_affree","f_rev"],{money:1,label:"FEE → doanh thu"}],
+ // liên kết ra hệ One Solution + toàn cầu
+ ["affree","day_sales",["f_affree"],{bidir:1,label:"đặt hàng / route"}],
+ ["affree","affree_us",["f_affree"],{bidir:1,label:"cross-border US/CA"}],
+ // US
+ ["one_ai","one_touch",["f_us"],{bow:260,label:"quốc tế hoá"}],
+ ["one_touch","amazon",["f_us"]],["one_touch","ytus",["f_us"]],["one_touch","spotify",["f_us"]],
+ ["one_touch","shopify",["f_us"]],["one_touch","digitn",["f_us"]],["one_touch","affree_us",["f_us"]],
+ ["affree_us","one_solution",["f_us"],{money:1,bow:520,label:"$ hồi về"}],
+ ["one_touch","day_sales_omo",["f_us"],{dash:1,bow:300,label:"Mỹ → OMO"}],
+];
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const SVGNS="http://www.w3.org/2000/svg";
+// Affree là SÀN MỞ rộng lớn: đẩy toàn bộ hệ One Solution sang phải, chừa vùng trái cho Affree
+const OFFX=440;
+const AFF_IDS=new Set(["aff_brands","aff_stores","aff_services","aff_buyers","aff_intake","affree","aff_ledger","aff_propose","aff_fee"]);
+N.forEach(n=>{if(!AFF_IDS.has(n.id))n.x+=OFFX;});
+ZONES.forEach(z=>{if(!z.aff)z.x+=OFFX;});
+const WORLD_W=1820+OFFX, WORLD_H=2180;
+const world=document.getElementById('world');
+const wires=document.getElementById('wires');
+world.style.width=WORLD_W+'px'; world.style.height=WORLD_H+'px';
+wires.setAttribute('width',WORLD_W); wires.setAttribute('height',WORLD_H);
+wires.setAttribute('viewBox',`0 0 ${WORLD_W} ${WORLD_H}`);
+
+const flowColor=Object.fromEntries(FLOWS.map(f=>[f.id,f.c]));
+const byId=Object.fromEntries(N.map(n=>[n.id,n]));
+// node -> set of flows (from edges)
+const nodeFlows={}; N.forEach(n=>nodeFlows[n.id]=new Set());
+E.forEach(e=>{(e[2]||[]).forEach(f=>{nodeFlows[e[0]]?.add(f);nodeFlows[e[1]]?.add(f);});});
+
+// arrowhead marker
+const defs=document.createElementNS(SVGNS,'defs');
+defs.innerHTML=`<marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker>
+  <marker id="arrowM" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+  <path d="M0,0 L10,5 L0,10 z" fill="#F5C451"/></marker>`;
+wires.appendChild(defs);
+
+// gears decor in engine room
+const decor=document.createElementNS(SVGNS,'g');
+function gear(cx,cy,r,teeth,dur){
+  const g=document.createElementNS(SVGNS,'g'); g.setAttribute('class','gear');
+  g.style.animationDuration=dur+'s';
+  let d=''; const inner=r*0.62;
+  for(let i=0;i<teeth;i++){const a=(i/teeth)*Math.PI*2, a2=((i+0.5)/teeth)*Math.PI*2;
+    d+=(i?'L':'M')+(cx+Math.cos(a)*r)+','+(cy+Math.sin(a)*r)+' L'+(cx+Math.cos(a+0.12)*inner)+','+(cy+Math.sin(a+0.12)*inner)+' L'+(cx+Math.cos(a2-0.12)*inner)+','+(cy+Math.sin(a2-0.12)*inner);}
+  d+='Z';
+  const p=document.createElementNS(SVGNS,'path'); p.setAttribute('d',d);
+  const c=document.createElementNS(SVGNS,'circle'); c.setAttribute('cx',cx);c.setAttribute('cy',cy);c.setAttribute('r',inner*0.45);
+  g.appendChild(p); g.appendChild(c); return g;
+}
+[[210,1780,70,16,40],[300,1700,46,12,28],[1640,1980,80,18,46],[1560,1900,50,12,30],[700,2070,40,11,24]].forEach(p=>decor.appendChild(gear(...p)));
+wires.appendChild(decor);
+
+const edgeLayer=document.createElementNS(SVGNS,'g'); wires.appendChild(edgeLayer);
+const dotLayer=document.createElementNS(SVGNS,'g'); wires.appendChild(dotLayer);
+
+// zones
+ZONES.forEach(z=>{
+  const el=document.createElement('div'); el.className='zone';
+  el.style.cssText+=`left:${z.x}px;top:${z.y}px;width:${z.w}px;height:${z.h}px;--zc:${z.c}`;
+  el.innerHTML=`<span class="zlabel">${z.label}</span>`+(z.note?`<span class="znote">${z.note}</span>`:'');
+  world.appendChild(el);
+});
+
+// nodes
+const nodeEls={};
+N.forEach(n=>{
+  const el=document.createElement('div');
+  el.className='node '+n.role;
+  el.tabIndex=0;
+  el.style.cssText=`left:${n.x-n.w/2}px;top:${n.y-n.h/2}px;width:${n.w}px;min-height:${n.h}px;--nc:${ZC[n.z]}`;
+  if(n.grad){el.style.background=n.grad;el.style.borderColor=ZC[n.z];}
+  el.innerHTML=`<div class="nlabel">${n.t}</div>`+(n.m?`<div class="nmeta">${n.m}</div>`:'');
+  el.dataset.id=n.id;
+  world.appendChild(el); nodeEls[n.id]=el;
+  el.addEventListener('click',ev=>{ev.stopPropagation(); if(!dragMoved) openPanel(n.id);});
+  el.addEventListener('keydown',ev=>{if(ev.key==='Enter')openPanel(n.id);});
+  el.addEventListener('mousedown',startNodeDrag);
+});
+
+// edges
+const edgeEls=[]; // {el, e, a, b}
+function rectOf(n){return {cx:n.x,cy:n.y,hw:n.w/2,hh:n.h/2};}
+function borderPt(n,tx,ty){ // intersection of center->(tx,ty) with node rect
+  const r=rectOf(n); let dx=tx-r.cx, dy=ty-r.cy;
+  if(dx===0&&dy===0)return{x:r.cx,y:r.cy};
+  const sx=Math.abs(dx)<1e-6?Infinity:r.hw/Math.abs(dx);
+  const sy=Math.abs(dy)<1e-6?Infinity:r.hh/Math.abs(dy);
+  const s=Math.min(sx,sy); return {x:r.cx+dx*s, y:r.cy+dy*s};
+}
+function pathD(a,b,bow){
+  const A=byId[a],B=byId[b]; bow=bow||0;
+  const s=borderPt(A,B.x+bow*0.4,B.y), e=borderPt(B,A.x+bow*0.4,A.y);
+  const dy=e.y-s.y;
+  const c1x=s.x+bow, c1y=s.y+dy*0.42;
+  const c2x=e.x+bow, c2y=e.y-dy*0.42;
+  return `M${s.x},${s.y} C${c1x},${c1y} ${c2x},${c2y} ${e.x},${e.y}`;
+}
+E.forEach(e=>{
+  const [a,b,flows,o]=[e[0],e[1],e[2]||[],e[3]||{}];
+  const p=document.createElementNS(SVGNS,'path');
+  p.setAttribute('class','wire'+(o.money?' money':''));
+  p.setAttribute('d',pathD(a,b,o.bow));
+  if(o.dash&&!o.money)p.setAttribute('stroke-dasharray','5 5');
+  p.setAttribute('marker-end','url(#'+(o.money?'arrowM':'arrow')+')');
+  if(o.bidir)p.setAttribute('marker-start','url(#'+(o.money?'arrowM':'arrow')+')');
+  if(!o.money){const fc=flows.length?flowColor[flows[0]]:'#3a4660'; p.style.setProperty('--wc',fc);}
+  edgeLayer.appendChild(p);
+  let lbl=null;
+  if(o.label){lbl=document.createElementNS(SVGNS,'text');lbl.setAttribute('class','wlabel');lbl.textContent=o.label;edgeLayer.appendChild(lbl);}
+  edgeEls.push({el:p,lbl,a,b,flows,o});
+});
+function refreshEdgeGeom(ed){
+  ed.el.setAttribute('d',pathD(ed.a,ed.b,ed.o.bow));
+  if(ed.lbl){const len=ed.el.getTotalLength(),pt=ed.el.getPointAtLength(len*0.5);ed.lbl.setAttribute('x',pt.x+4);ed.lbl.setAttribute('y',pt.y-3);}
+}
+edgeEls.forEach(refreshEdgeGeom);
+
+/* ============================================================
+   FLOW FILTER
+   ============================================================ */
+let activeFlow='all';
+const flowbar=document.getElementById('flowbar');
+FLOWS.forEach((f,i)=>{
+  const c=document.createElement('span'); c.className='chip'; c.dataset.flow=f.id;
+  c.style.setProperty('--fc',f.c);
+  c.innerHTML=`<span class="dot" style="color:${f.c}"></span>${f.label}`;
+  flowbar.insertBefore(c, document.querySelectorAll('#flowbar .sep')[1]);
+});
+flowbar.addEventListener('click',ev=>{
+  const c=ev.target.closest('.chip[data-flow]'); if(!c)return;
+  setFlow(c.dataset.flow);
+});
+function setFlow(fl){
+  activeFlow=fl;
+  document.querySelectorAll('.chip[data-flow]').forEach(c=>c.classList.toggle('active',c.dataset.flow===fl));
+  const all=fl==='all';
+  edgeEls.forEach(ed=>{
+    const on=all||ed.flows.includes(fl);
+    ed.el.classList.toggle('dim',!all&&!on);
+    ed.el.classList.toggle('hot',!all&&on);
+    if(ed.lbl)ed.lbl.classList.toggle('show',!all&&on);
+  });
+  N.forEach(n=>{
+    const on=all||nodeFlows[n.id].has(fl);
+    nodeEls[n.id].classList.toggle('dim',!all&&!on);
+  });
+  buildDots();
+}
+
+/* ============================================================
+   ANIMATION — flowing dots / $ along active edges
+   ============================================================ */
+const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+let dots=[];
+function buildDots(){
+  dotLayer.innerHTML=''; dots=[];
+  if(reduce)return;
+  // 'all' mode: chỉ chạy 2 vòng tiền lõi (đỡ rối). Chọn luồng: chạy đúng các tuyến của luồng đó.
+  let set;
+  if(activeFlow==='all'){
+    set=edgeEls.filter(e=>(e.a==='rev_hub'&&e.b==='one_solution')||(e.a==='one_solution'&&e.b==='inv'));
+  }else{
+    set=edgeEls.filter(e=>e.flows.includes(activeFlow));
+  }
+  set.forEach(ed=>{
+    const len=ed.el.getTotalLength(); if(len<14)return;
+    const n=len>820?2:1;
+    for(let i=0;i<n;i++){
+      let el;
+      if(ed.o.money){
+        el=document.createElementNS(SVGNS,'text');el.setAttribute('class','moneydot');el.textContent='$';
+      }else{
+        el=document.createElementNS(SVGNS,'path');el.setAttribute('class','flowdot');el.setAttribute('d','M-5,-4 L7,0 L-5,4 Z');
+        el.style.fill=ed.flows.length?flowColor[ed.flows[0]]:'#7CC6FF';
+      }
+      dotLayer.appendChild(el);
+      dots.push({edge:ed,len,t:i/n,el,money:!!ed.o.money,pps:ed.o.money?72:96});
+    }
+  });
+}
+let last=performance.now();
+function tick(now){
+  const dt=Math.min(60,now-last); last=now;
+  for(const d of dots){
+    d.t+=(d.pps*dt/1000)/d.len; if(d.t>=1)d.t-=1;
+    const p=d.edge.el.getPointAtLength(d.len*d.t);
+    if(d.money){ d.el.setAttribute('x',p.x-3); d.el.setAttribute('y',p.y+4.5); }
+    else{ // chevron xoay theo tiếp tuyến → luôn chỉ đúng chiều from → to
+      const p2=d.edge.el.getPointAtLength(Math.min(d.len,d.len*d.t+2));
+      const ang=Math.atan2(p2.y-p.y,p2.x-p.x)*180/Math.PI;
+      d.el.setAttribute('transform',`translate(${p.x},${p.y}) rotate(${ang})`);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+buildDots(); requestAnimationFrame(tick);
+
+/* ============================================================
+   DETAIL PANEL
+   ============================================================ */
+const panel=document.getElementById('panel');
+function neigh(id,dir){ // dir 'to' or 'from'
+  const out=[];
+  E.forEach(e=>{const o=e[3]||{};
+    if(dir==='to'&&(e[0]===id||(o.bidir&&e[1]===id)))out.push(e[0]===id?e[1]:e[0]);
+    if(dir==='from'&&(e[1]===id||(o.bidir&&e[0]===id)))out.push(e[1]===id?e[0]:e[1]);
+  });
+  return [...new Set(out)];
+}
+function openPanel(id){
+  const n=byId[id];
+  panel.classList.add('show'); panel.style.setProperty('--pc',ZC[n.z]);
+  const KIND={loi:'Lõi vận hành',dist:'Phân phối · chuyên trang',cast:'Phát tán · Khúc chạm',funnel:'Phễu & hồi quy',rev:'Doanh thu',engine:'Engine Room · Core Tech',affree:'Affree',us:'Mở rộng Mỹ'};
+  document.getElementById('pkind').textContent=KIND[n.z]||'';
+  document.getElementById('ptitle').textContent=n.t+(n.m?' — '+n.m:'');
+  document.getElementById('pdesc').textContent=n.d||'';
+  const ps=document.getElementById('pstats'); if(n.stats){ps.style.display='block';document.getElementById('pstatsv').textContent=n.stats;}else ps.style.display='none';
+  fillPills('pfromv',neigh(id,'from'),'pfrom');
+  fillPills('ptov',neigh(id,'to'),'pto');
+  const fv=document.getElementById('pflowsv'); fv.innerHTML='';
+  [...nodeFlows[id]].forEach(fid=>{const f=FLOWS.find(x=>x.id===fid);
+    const s=document.createElement('span');s.className='pflow';s.innerHTML=`<i style="background:${f.c}"></i>${f.label}`;fv.appendChild(s);});
+  document.getElementById('pflows').style.display=nodeFlows[id].size?'block':'none';
+}
+function fillPills(spanId,ids,rowId){
+  const sp=document.getElementById(spanId); sp.innerHTML='';
+  document.getElementById(rowId).style.display=ids.length?'block':'none';
+  ids.forEach(i=>{const n=byId[i];const b=document.createElement('span');b.className='pill';b.textContent=n.t;
+    b.onclick=()=>{highlightNode(i);openPanel(i);};sp.appendChild(b);});
+}
+function highlightNode(id){N.forEach(n=>nodeEls[n.id].classList.toggle('hot',n.id===id));}
+document.getElementById('pclose').onclick=()=>{panel.classList.remove('show');N.forEach(n=>nodeEls[n.id].classList.remove('hot'));};
+
+/* ============================================================
+   PAN / ZOOM
+   ============================================================ */
+const stage=document.getElementById('stage');
+let scale=1, tx=0, ty=0;
+function apply(){world.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;}
+function fit(){
+  const r=stage.getBoundingClientRect();
+  const s=Math.min(r.width/WORLD_W, r.height/WORLD_H)*0.96;
+  scale=s; tx=(r.width-WORLD_W*s)/2; ty=(r.height-WORLD_H*s)/2; apply();
+}
+window.addEventListener('resize',()=>{}); // keep current
+stage.addEventListener('wheel',ev=>{
+  ev.preventDefault();
+  const r=stage.getBoundingClientRect(), mx=ev.clientX-r.left, my=ev.clientY-r.top;
+  const f=ev.deltaY<0?1.12:1/1.12; const ns=Math.min(2.4,Math.max(0.18,scale*f));
+  tx=mx-(mx-tx)*(ns/scale); ty=my-(my-ty)*(ns/scale); scale=ns; apply();
+},{passive:false});
+// pan
+let panning=false,sx,sy;
+stage.addEventListener('mousedown',ev=>{
+  if(ev.target.closest('.node'))return;
+  panning=true; sx=ev.clientX-tx; sy=ev.clientY-ty; stage.classList.add('grabbing');
+  if(!ev.target.closest('#panel')&&!ev.target.closest('#legend')){panel.classList.remove('show');N.forEach(n=>nodeEls[n.id].classList.remove('hot'));}
+});
+window.addEventListener('mousemove',ev=>{
+  if(nodeDrag){doNodeDrag(ev);return;}
+  if(!panning)return; tx=ev.clientX-sx; ty=ev.clientY-sy; apply();
+});
+window.addEventListener('mouseup',()=>{panning=false;stage.classList.remove('grabbing');endNodeDrag();});
+// touch (basic pan + pinch)
+let pinch=null;
+stage.addEventListener('touchstart',ev=>{
+  if(ev.touches.length===1&&!ev.target.closest('.node')){panning=true;sx=ev.touches[0].clientX-tx;sy=ev.touches[0].clientY-ty;}
+  else if(ev.touches.length===2){const[a,b]=ev.touches;pinch={d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),s:scale};}
+},{passive:true});
+stage.addEventListener('touchmove',ev=>{
+  if(pinch&&ev.touches.length===2){const[a,b]=ev.touches;const d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
+    scale=Math.min(2.4,Math.max(0.18,pinch.s*d/pinch.d));apply();}
+  else if(panning&&ev.touches.length===1){tx=ev.touches[0].clientX-sx;ty=ev.touches[0].clientY-sy;apply();}
+},{passive:true});
+stage.addEventListener('touchend',()=>{panning=false;pinch=null;});
+
+document.getElementById('btnFit').onclick=fit;
+document.getElementById('btnZoomIn').onclick=()=>{const r=stage.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.18);};
+document.getElementById('btnZoomOut').onclick=()=>{const r=stage.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.18);};
+function zoomAt(mx,my,f){const ns=Math.min(2.4,Math.max(0.18,scale*f));tx=mx-(mx-tx)*(ns/scale);ty=my-(my-ty)*(ns/scale);scale=ns;apply();}
+
+/* ============================================================
+   NODE DRAG (when unlocked)
+   ============================================================ */
+let locked=true, nodeDrag=null, dragMoved=false;
+const btnLock=document.getElementById('btnLock');
+btnLock.onclick=()=>{locked=!locked;btnLock.classList.toggle('on',!locked);
+  btnLock.textContent=locked?'🔓 Mở khoá':'🔒 Đang mở · kéo node';
+  document.getElementById('hint').textContent=locked
+    ?'Rê chuột / kéo để di chuyển · lăn chuột để zoom · bấm một mắt xích để xem chi tiết · chọn LUỒNG để tô sáng tuyến'
+    :'Đang MỞ KHOÁ — kéo từng node để sắp lại bố cục · bấm 💾 để lấy mã vị trí · bấm 🔒 để khoá lại';
+};
+function startNodeDrag(ev){
+  if(locked)return; ev.stopPropagation(); ev.preventDefault();
+  const id=ev.currentTarget.dataset.id;
+  nodeDrag={id,startX:ev.clientX,startY:ev.clientY,ox:byId[id].x,oy:byId[id].y}; dragMoved=false;
+}
+function doNodeDrag(ev){
+  const n=byId[nodeDrag.id];
+  n.x=nodeDrag.ox+(ev.clientX-nodeDrag.startX)/scale;
+  n.y=nodeDrag.oy+(ev.clientY-nodeDrag.startY)/scale;
+  if(Math.abs(ev.clientX-nodeDrag.startX)+Math.abs(ev.clientY-nodeDrag.startY)>3)dragMoved=true;
+  nodeEls[n.id].style.left=(n.x-n.w/2)+'px'; nodeEls[n.id].style.top=(n.y-n.h/2)+'px';
+  edgeEls.forEach(ed=>{if(ed.a===n.id||ed.b===n.id)refreshEdgeGeom(ed);});
+}
+function endNodeDrag(){ if(nodeDrag){nodeDrag=null; setTimeout(()=>dragMoved=false,30);} }
+
+document.getElementById('btnSave').onclick=()=>{
+  const pos=Object.fromEntries(N.map(n=>[n.id,[Math.round(n.x),Math.round(n.y)]]));
+  const txt=JSON.stringify(pos);
+  const blob=new Blob([txt],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='vi-tri-co-may.json';a.click();
+  try{navigator.clipboard.writeText(txt);}catch(e){}
+  const h=document.getElementById('hint');const old=h.textContent;
+  h.textContent='Đã tải vị trí ra file vi-tri-co-may.json (và copy vào clipboard). Dán đè vào biến DATA để lưu cố định.';
+  setTimeout(()=>h.textContent=old,4200);
+};
+
+/* ============================================================
+   GROWTH OVERLAY
+   ============================================================ */
+const growth=document.getElementById('growth'),btnGrowth=document.getElementById('btnGrowth');
+btnGrowth.onclick=()=>{const on=!growth.classList.contains('show');growth.classList.toggle('show',on);btnGrowth.classList.toggle('on',on);};
+document.getElementById('gclose').onclick=()=>{growth.classList.remove('show');btnGrowth.classList.remove('on');};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){growth.classList.remove('show');btnGrowth.classList.remove('on');panel.classList.remove('show');}});
+
+/* init */
+fit();
+</script>
+</body>
+</html>
