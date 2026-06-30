@@ -72,7 +72,8 @@ h1 .gear{color:var(--c-engine)}
 .node .nlabel{font-family:var(--disp);font-weight:600;font-size:12px;line-height:1.18;color:var(--ink)}
 .node .nmeta{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.2}
 .node.driver{background:linear-gradient(160deg,#1b2540,#10182c);border-left-width:0;border:1px solid var(--nc);
-  box-shadow:0 0 22px color-mix(in srgb,var(--nc) 40%,transparent)}
+  box-shadow:0 0 22px color-mix(in srgb,var(--nc) 40%,transparent);animation:nodepulse 3.4s ease-in-out infinite}
+@keyframes nodepulse{0%,100%{box-shadow:0 0 15px color-mix(in srgb,var(--nc) 28%,transparent)}50%{box-shadow:0 0 32px color-mix(in srgb,var(--nc) 62%,transparent)}}
 .node.driver .nlabel{font-size:14px}
 .node.hub{background:linear-gradient(160deg,#1a2236,#121a2b);border-width:1px;border-color:color-mix(in srgb,var(--nc) 55%,var(--line))}
 .node.hub .nlabel{font-size:13px}
@@ -98,7 +99,7 @@ h1 .gear{color:var(--c-engine)}
 .gear circle{fill:none;stroke:var(--c-engine);stroke-width:1.4;opacity:.18}
 @keyframes spin{to{transform:rotate(360deg)}}
 .gear{transform-box:fill-box;transform-origin:center;animation:spin linear infinite}
-@media (prefers-reduced-motion:reduce){.gear{animation:none}}
+@media (prefers-reduced-motion:reduce){.gear{animation:none}.node.driver{animation:none}}
 
 /* ---------- Detail panel ---------- */
 #panel{position:absolute;top:12px;right:12px;width:300px;max-width:calc(100vw - 24px);
@@ -151,6 +152,40 @@ h1 .gear{color:var(--c-engine)}
   font-size:10.5px;color:var(--muted);background:rgba(11,14,20,.7);border:1px solid var(--line);
   border-radius:999px;padding:5px 13px;pointer-events:none}
 @media(max-width:720px){#legend{display:none}.sub{display:none}#panel{width:260px}}
+
+/* ---------- LIGHT THEME ---------- */
+[data-theme="light"]{
+  --bg:#EEF2F9; --bg2:#E4EAF4; --surface:#FFFFFF; --surface2:#EDF1F8;
+  --ink:#16212F; --muted:#586780; --line:#CCD6E6;
+}
+[data-theme="light"] body{background:var(--bg)}
+[data-theme="light"] #stage{background:
+  radial-gradient(1200px 700px at 70% -10%,#dbe6f8 0%,transparent 60%),
+  radial-gradient(900px 600px at 10% 110%,#e4def4 0%,transparent 55%),
+  var(--bg)}
+[data-theme="light"] header{background:linear-gradient(180deg,#ffffff,#eef2f9)}
+[data-theme="light"] .node{box-shadow:0 1px 3px rgba(25,40,65,.13)}
+[data-theme="light"] .node.driver{background:linear-gradient(160deg,#e9f0ff,#dde7fb)}
+[data-theme="light"] .node.hub{background:linear-gradient(160deg,#ffffff,#eef3fb)}
+[data-theme="light"] .node.asset{background:repeating-linear-gradient(135deg,#eef2fb,#eef2fb 7px,#e5ebf6 7px,#e5ebf6 14px)}
+[data-theme="light"] .wire{stroke:#94a6c2}
+[data-theme="light"] #panel,[data-theme="light"] #legend,[data-theme="light"] .hint{background:rgba(255,255,255,.96)}
+[data-theme="light"] #panel{box-shadow:0 18px 50px rgba(30,45,70,.16)}
+[data-theme="light"] #growth{background:rgba(220,228,242,.84)}
+[data-theme="light"] .gcard{background:linear-gradient(160deg,#ffffff,#eef2f9)}
+[data-theme="light"] .gbox,[data-theme="light"] .gcard .ttm,[data-theme="light"] #panel .pill{background:var(--surface2)}
+[data-theme="light"] .gclose{background:var(--surface)}
+/* node gradient nội tuyến (đè bằng !important) + chữ xám nhạt → tối, đảm bảo light hoàn toàn */
+[data-theme="light"] .node[data-id="vcc"]{background:linear-gradient(120deg,#f9ccd5,#ffe6b6)!important;border-color:#d8447a!important}
+[data-theme="light"] .node[data-id="aff_fee"]{background:linear-gradient(100deg,#dcf0f4,#f3e7c3)!important;border-color:#1fa3bd!important}
+[data-theme="light"] .node[data-id="vcc"] .nmeta,[data-theme="light"] .node[data-id="aff_fee"] .nmeta{color:#4a5970}
+[data-theme="light"] #panel .pdesc,[data-theme="light"] .gbox ul{color:#2c3a4d}
+[data-theme="light"] #panel .pill{color:#243246}
+[data-theme="light"] #legend .note,[data-theme="light"] #panel .pflow{color:#46546c}
+[data-theme="light"] .wire{stroke:#8a9cba}
+[data-theme="light"] #legend .lg:nth-child(2) .sw{background:linear-gradient(160deg,#e9f0ff,#dde7fb)!important}
+[data-theme="light"] #legend .lg:nth-child(3) .sw{background:linear-gradient(160deg,#ffffff,#eef3fb)!important}
+[data-theme="light"] #legend .lg:nth-child(5) .sw{background:repeating-linear-gradient(135deg,#eef2fb,#eef2fb 4px,#e5ebf6 4px,#e5ebf6 8px)!important}
 </style>
 </head>
 <body>
@@ -168,6 +203,7 @@ h1 .gear{color:var(--c-engine)}
       <!-- flow chips injected -->
       <span class="sep"></span>
       <span class="chip util" id="btnGrowth">📈 Lăng kính Tăng trưởng</span>
+      <span class="chip" id="btnTheme">🌗 Light</span>
       <span class="chip" id="btnLock">🔓 Mở khoá</span>
       <span class="chip" id="btnFit">⤢ Vừa màn hình</span>
       <span class="chip" id="btnZoomIn">＋</span>
@@ -247,8 +283,9 @@ const FLOWS=[
   {id:"f_rev",    label:"Doanh thu → Lõi",      c:"#F5C451"},
   {id:"f_us",     label:"Mở rộng Mỹ",           c:"#FB7185"},
   {id:"f_affree", label:"Affree & vertical",    c:"#38BDF8"},
+  {id:"f_vcc",    label:"Vietnamese Cloud Country", c:"#FF49C3"},
 ];
-const ZC={loi:"#5B8DEF",dist:"#19C2AC",cast:"#E8973A",funnel:"#B57BFF",rev:"#EAB308",engine:"#818CF8",affree:"#22D3EE",us:"#FB7185"};
+const ZC={loi:"#5B8DEF",dist:"#19C2AC",cast:"#E8973A",funnel:"#B57BFF",rev:"#EAB308",engine:"#818CF8",affree:"#22D3EE",us:"#FB7185",vcc:"#FF49C3"};
 
 const ZONES=[
   {label:"🏢 LÕI VẬN HÀNH",        x:300,y:60,  w:1180,h:400, c:ZC.loi,   note:"Vốn → hàng + nội dung → sản xuất AI → chuẩn hoá tại One Solution"},
@@ -257,9 +294,11 @@ const ZONES=[
   {label:"🔁 PHỄU & HỒI QUY",      x:300,y:982, w:1180,h:320, c:ZC.funnel,note:"NFC Chạm–Chọn–Nhận + RCS/MMS → Tệp → hồi quy · phủ logic Thương Mại Chính Xác"},
   {label:"💰 DOANH THU → LÕI",     x:300,y:1322,w:1180,h:236, c:ZC.rev,   note:"8 túi tiền → rev_hub → One Solution → tái đầu tư"},
   {label:"⚙️ ENGINE ROOM — NỀN MÓNG CÔNG NGHỆ (cấp lực mọi tầng)",x:90,y:1582,w:1720,h:548,c:ZC.engine,note:"Canadisign (IP) → One Solution · MSAS × Mạng xe × NFC × Tệp"},
-  {label:"🛒 AFFREE — SÀN MỞ · NGƯỜI MUA ↔ NGƯỜI BÁN", x:30,y:556,w:474,h:828, c:ZC.affree, aff:true, note:"Cung từ khắp nơi (third-party, KHÔNG thuộc One Solution) · VN + US/CA"},
-  {label:"CUNG · third-party (khắp nơi)", x:42,y:600,w:202,h:254, c:ZC.affree, aff:true, note:""},
-  {label:"CẦU · người mua",               x:42,y:902,w:202,h:134, c:ZC.affree, aff:true, note:""},
+  {label:"🛒 AFFREE — SÀN MỞ · NGƯỜI MUA ↔ NGƯỜI BÁN", x:20,y:548,w:528,h:862, c:ZC.affree, aff:true, note:"Cung từ khắp nơi (third-party, KHÔNG thuộc One Solution) · VN + US/CA · mỗi item là một listing"},
+  {label:"NHÃN HÀNG · third-party",      x:30,y:582,w:508,h:84,  c:ZC.affree, aff:true, note:""},
+  {label:"CỬA HÀNG / CSKD · third-party",       x:30,y:674,w:508,h:84,  c:ZC.affree, aff:true, note:""},
+  {label:"DỊCH VỤ ĐÍNH KÈM · theo NĂNG LỰC hệ thống", x:30,y:766,w:508,h:162, c:ZC.affree, aff:true, note:""},
+  {label:"CẦU",                          x:430,y:1092,w:108,h:120,c:ZC.affree, aff:true, note:""},
   {label:"🇺🇸 MỞ RỘNG MỸ",         x:1540,y:400,w:262,h:512, c:ZC.us,   note:""},
 ];
 
@@ -347,27 +386,53 @@ const N=[
  {id:"housecons",z:"engine",role:"vertical",x:890,y:2060,w:182,h:46,t:"HouseCons68",m:"quy hoạch + dự toán XD + phong thủy",d:"Vertical Group 01+02 — anh em HomeInfo68 (chung place-id). Tra QMXD + dự toán chi phí xây dựng (engine đơn giá nội bộ) + phong thủy."},
 
  // ---- AFFREE — SÀN MỞ (cung third-party ↔ cầu người mua) ----
- // CUNG — third-party, từ khắp nơi (KHÔNG phải tài sản One Solution)
- {id:"aff_brands",z:"affree",role:"front",x:143,y:640,w:184,h:50,t:"Nhãn hàng",m:"BR · KM · Mencode · Aloclean · PNJ · …",
-   d:"Hàng nghìn NHÃN HÀNG tự listing lên sàn — KHÔNG thuộc One Solution, kéo về từ khắp nơi (VN + toàn cầu)."},
- {id:"aff_stores",z:"affree",role:"front",x:143,y:706,w:184,h:50,t:"Cửa hàng",m:"BHX · CircleK · 7-Eleven · tạp hoá VN & quốc tế",
-   d:"Cửa hàng / chuỗi / điểm bán bên thứ ba đưa hàng lên sàn — siêu thị mini, chuỗi tiện lợi, tạp hoá trong và ngoài Việt Nam."},
- {id:"aff_services",z:"affree",role:"front",x:143,y:776,w:184,h:54,t:"Dịch vụ đính kèm",m:"giao · lắp đặt · bảo hành · tài chính · …",
-   d:"Nhà cung cấp DỊCH VỤ bên thứ ba gắn kèm giao dịch: giao vận, lắp đặt, bảo hành, thanh toán/tài chính, định giá, xây dựng…"},
+ // NHÃN HÀNG — mỗi item là một listing (third-party, khắp nơi)
+ {id:"aff_brands",z:"affree",role:"front",x:90,y:624,w:104,h:44,t:"Nhãn hàng",m:"hàng nghìn nhãn",d:"Danh mục NHÃN HÀNG bên thứ ba tự listing lên sàn — không thuộc One Solution. Bề rộng: hàng nghìn nhãn trong & ngoài VN."},
+ {id:"aff_br1",z:"affree",role:"driven",x:182,y:624,w:54,h:44,t:"BR",d:"Một nhãn hàng listing trên Affree."},
+ {id:"aff_br2",z:"affree",role:"driven",x:242,y:624,w:54,h:44,t:"KM",d:"Một nhãn hàng listing trên Affree."},
+ {id:"aff_br3",z:"affree",role:"driven",x:312,y:624,w:64,h:44,t:"Mencode",d:"Một nhãn hàng listing trên Affree."},
+ {id:"aff_br4",z:"affree",role:"driven",x:384,y:624,w:66,h:44,t:"Aloclean",d:"Một nhãn hàng listing trên Affree."},
+ {id:"aff_br5",z:"affree",role:"driven",x:452,y:624,w:54,h:44,t:"PNJ",d:"Một nhãn hàng listing trên Affree."},
+ {id:"aff_br6",z:"affree",role:"driven",x:510,y:624,w:52,h:44,t:"+ n nhãn",d:"…và nhiều nhãn khác — bề rộng danh mục không giới hạn (chi phí biên ~0)."},
+ // CỬA HÀNG / CSKD — nhiều thể loại cơ sở kinh doanh
+ {id:"aff_stores",z:"affree",role:"front",x:90,y:716,w:104,h:44,t:"Cửa hàng / CSKD",m:"chuỗi · tạp hoá · CSKD",d:"MỌI loại cơ sở kinh doanh (CSKD) bên thứ ba đưa hàng/dịch vụ lên sàn — chuỗi tiện lợi, siêu thị, nhà thuốc, F&B, tạp hoá, cây xăng, salon… trong và ngoài Việt Nam. MSAS có hồ sơ ~582.000 CSKD để khớp nối."},
+ {id:"aff_st1",z:"affree",role:"driven",x:178,y:716,w:52,h:44,t:"BHX",d:"Bách Hoá Xanh — chuỗi siêu thị mini."},
+ {id:"aff_st2",z:"affree",role:"driven",x:236,y:716,w:58,h:44,t:"CircleK",d:"Chuỗi cửa hàng tiện lợi."},
+ {id:"aff_st3",z:"affree",role:"driven",x:300,y:716,w:58,h:44,t:"7-Eleven",d:"Chuỗi cửa hàng tiện lợi."},
+ {id:"aff_st4",z:"affree",role:"driven",x:366,y:716,w:62,h:44,t:"Nhà thuốc",d:"Nhà thuốc / chuỗi dược."},
+ {id:"aff_st5",z:"affree",role:"driven",x:432,y:716,w:64,h:44,t:"Quán ăn · F&B",d:"Nhà hàng, quán ăn, café…"},
+ {id:"aff_st6",z:"affree",role:"driven",x:502,y:716,w:62,h:44,t:"+ n CSKD",d:"…và mọi CSKD khác: cây xăng, siêu thị, tạp hoá, salon/spa, chợ… (~582K cơ sở kinh doanh)."},
+ // DỊCH VỤ ĐÍNH KÈM — suy ra từ NĂNG LỰC toàn hệ thống One Solution
+ {id:"aff_services",z:"affree",role:"front",x:88,y:846,w:104,h:54,t:"Dịch vụ đính kèm",m:"theo năng lực hệ thống",d:"Các dịch vụ gắn kèm giao dịch, suy ra trực tiếp từ NĂNG LỰC công nghệ của One Solution — mỗi dịch vụ ánh xạ một tài sản lõi."},
+ {id:"aff_sv1",z:"affree",role:"driven",x:206,y:812,w:88,h:46,t:"Giao 15′",m:"xe điện + MSAS",d:"Giao siêu nhanh nội đô — mạng xe điện (Trụ Cột 2) + định tuyến MSAS."},
+ {id:"aff_sv2",z:"affree",role:"driven",x:302,y:812,w:88,h:46,t:"Định giá BĐS",m:"HomeInfo68",d:"Định giá bất động sản kép (AI–Big Data / thông lệ Ngân hàng)."},
+ {id:"aff_sv3",z:"affree",role:"driven",x:398,y:812,w:88,h:46,t:"Dự toán XD",m:"HouseCons68 + phong thủy",d:"Tra quy hoạch + dự toán chi phí xây dựng + phong thủy."},
+ {id:"aff_sv4",z:"affree",role:"driven",x:494,y:812,w:88,h:46,t:"Tra cứu địa điểm",m:"Goollow68 / MSAS",d:"Tra cứu địa điểm, CSKD, lộ trình — Goollow68 trên nền MSAS."},
+ {id:"aff_sv5",z:"affree",role:"driven",x:206,y:876,w:88,h:46,t:"Nhắn tin chính chủ",m:"daySales A05 · MMS/RCS",d:"Gửi tin brand-verified không bị filter — định danh A05."},
+ {id:"aff_sv6",z:"affree",role:"driven",x:302,y:876,w:88,h:46,t:"Định danh & ưu đãi",m:"NFC Chạm",d:"Chạm-Chọn-Nhận: định danh + ưu đãi cá nhân hoá trong 1 giây."},
+ {id:"aff_sv7",z:"affree",role:"driven",x:398,y:876,w:88,h:46,t:"Tối ưu giá + combo",m:"MLBL / OS-AI",d:"Mua Lợi Bán Lời: so giá, gợi combo (túi đơn/đôi/đa dạng), bán chéo."},
+ {id:"aff_sv8",z:"affree",role:"driven",x:494,y:876,w:88,h:46,t:"Nhạc & nội dung",m:"One AI Production",d:"Album nhạc bản quyền + nội dung sản xuất AI gắn kèm."},
  // CẦU
- {id:"aff_buyers",z:"affree",role:"front",x:143,y:958,w:184,h:54,t:"Người mua",m:"VN + US/CA",
-   d:"Phía CẦU — người mua / người cần dịch vụ, trong nước và quốc tế. Affree khớp họ tới đúng nguồn cung."},
+ {id:"aff_buyers",z:"affree",role:"front",x:484,y:1150,w:104,h:54,t:"Người mua",m:"VN + US/CA",d:"Phía CẦU — người mua / người cần dịch vụ, trong nước và quốc tế. Affree khớp họ tới đúng nguồn cung."},
+ // điểm neo (vô hình) ở đáy mỗi KHỐI cung → để mũi tên xuất phát từ khối, không phải node nhỏ
+ {id:"an_brands",z:"affree",role:"anchor",x:36,y:666,w:2,h:2,t:""},
+ {id:"an_stores",z:"affree",role:"anchor",x:36,y:758,w:2,h:2,t:""},
+ {id:"an_services",z:"affree",role:"anchor",x:36,y:928,w:2,h:2,t:""},
  // CÔNG NGHỆ KẾT NỐI — lõi sàn Affree
- {id:"aff_intake",z:"affree",role:"driven",x:392,y:640,w:196,h:56,t:"Sàn Listing — Universal Catalog",m:"mọi nhãn · cửa hàng · dịch vụ · sản phẩm/combo · nhạc",
-   d:"Nơi MỌI cung được listing lên để người mua mua được: nhãn hàng + cửa hàng + dịch vụ bên thứ ba (khắp nơi) + sản phẩm và túi combo MLBL (đơn · đôi ghép · đa dạng) của 7 chuyên trang + tính năng HomeInfo68/HouseCons68/Goollow68 + album nhạc bản quyền. Phủ VN + US/CA, chi phí biên ~0."},
- {id:"affree",z:"affree",role:"hub",x:392,y:754,w:204,h:70,t:"AFFREE — CÔNG NGHỆ KẾT NỐI",m:"khớp người mua ↔ người bán · From FREE → FEE",
-   d:"Lõi công nghệ HAI PHÍA (asset-light — KHÔNG ôm kho, KHÔNG sở hữu cung): khớp đúng người mua với đúng nhãn hàng / cửa hàng / dịch vụ từ khắp nơi. Người mua dùng MIỄN PHÍ. Vừa độc lập, vừa nối Day-Sales · Affree cross-border · Khúc Chạm; biến người dùng FREE thành giao dịch FEE."},
- {id:"aff_ledger",z:"affree",role:"driven",x:392,y:914,w:196,h:50,t:"Ghi nhận giao dịch",m:"thành công / thất bại",
+ {id:"aff_intake",z:"affree",role:"driven",x:284,y:968,w:472,h:50,t:"Sàn Listing — Universal Catalog",m:"gom mọi cung → để người mua mua được",
+   d:"Nơi MỌI cung được listing lên: nhãn hàng + cửa hàng + dịch vụ bên thứ ba (khắp nơi) + sản phẩm & túi combo MLBL (đơn·đôi·đa dạng) của 7 chuyên trang + tính năng HomeInfo68/HouseCons68/Goollow68 + album nhạc bản quyền. VN + US/CA, chi phí biên ~0."},
+ {id:"affree",z:"affree",role:"hub",x:284,y:1052,w:300,h:66,t:"AFFREE — CÔNG NGHỆ KẾT NỐI",m:"khớp người mua ↔ người bán · From FREE → FEE",
+   d:"Lõi công nghệ HAI PHÍA (asset-light — KHÔNG ôm kho, KHÔNG sở hữu cung): khớp đúng người mua với đúng nhãn / cửa hàng / dịch vụ từ khắp nơi. Người mua dùng MIỄN PHÍ. Vừa độc lập, vừa nối Day-Sales · Affree cross-border · Khúc Chạm; biến người dùng FREE thành giao dịch FEE."},
+ {id:"aff_ledger",z:"affree",role:"driven",x:182,y:1158,w:176,h:48,t:"Ghi nhận giao dịch",m:"thành công / thất bại",
    d:"Mỗi yêu cầu mua / lần AI đặt hộ được ghi nhận KẾT QUẢ (thành/bại, ở nguồn nào, vì sao). Cảm biến hiệu quả + dữ liệu gốc cho đề xuất."},
- {id:"aff_propose",z:"affree",role:"driven",x:392,y:1012,w:196,h:56,t:"Đề xuất đúng người – đúng dịch vụ",m:"matching engine",
+ {id:"aff_propose",z:"affree",role:"driven",x:182,y:1248,w:176,h:54,t:"Đề xuất đúng người – đúng dịch vụ",m:"matching engine",
    d:"Từ dữ liệu giao dịch + hành vi: ai cần gì → propose nhãn / cửa hàng / dịch vụ tương ứng cho đúng người mua. Càng nhiều giao dịch → đề xuất càng trúng."},
- {id:"aff_fee",z:"affree",role:"asset",x:392,y:1150,w:204,h:60,grad:"linear-gradient(100deg,#0e2a33 0%,#16384a 45%,#5a4a1e 80%,#7a5e16 100%)",t:"From FREE → FEE",m:"Hiển thị → Lead/Dữ liệu → Hoa hồng",
+ {id:"aff_fee",z:"affree",role:"asset",x:284,y:1338,w:300,h:58,grad:"linear-gradient(100deg,#0e2a33 0%,#16384a 45%,#5a4a1e 80%,#7a5e16 100%)",t:"From FREE → FEE",m:"Hiển thị → Lead/Dữ liệu → Hoa hồng",
    d:"Doanh thu KHÔNG từ người mua mà từ phía cung: Hiển thị (ưu tiên/tài trợ) → Lead & Dữ liệu → Giao dịch agentic (hoa hồng mỗi đơn AI hoàn tất). Mỗi giao dịch thành công = một điểm FEE → đổ về doanh thu lõi. Công nghệ đi ZERO → HERO."},
+
+ // ---- VIETNAMESE CLOUD COUNTRY (tầng tầm nhìn bao trùm) ----
+ {id:"vcc",z:"vcc",role:"driver",x:1190,y:82,w:420,h:70,grad:"linear-gradient(120deg,#6e0f1e 0%,#b3122b 42%,#caa12a 100%)",t:"VIETNAMESE CLOUD COUNTRY",m:"hạ tầng số hợp nhất của người Việt toàn cầu",
+   d:"Tầm nhìn bao trùm: cả cỗ máy hội tụ thành một 'quốc gia số' — Lãnh thổ số = MSAS (bản đồ đến số nhà); Công dân số = định danh A05 (daySales) + NFC Chạm; Dân số dữ liệu = Tệp khách 7 chuyên trang; Kinh tế mở = sàn Affree (người mua ↔ người bán, third-party toàn cầu); Kiều bào = One Touch + Affree cross-border (US/CA). Vòng doanh thu khép kín nuôi lại toàn hệ."},
 
  // ---- MỸ ----
  {id:"one_touch",z:"us",role:"hub",x:1655,y:452,w:170,h:48,t:"ONE TOUCH",m:"bệ phóng quốc tế",d:"Điểm chạm mở rộng — đưa sản phẩm/nội dung AI ra thị trường Mỹ qua các nền tảng số toàn cầu."},
@@ -432,9 +497,9 @@ const E=[
  ["thxl","day_sales_omo",["f_tech"],{dash:1,bow:300}],
  ["formula","msas",["f_tech"],{dash:1}],
  // affree — CUNG third-party listing lên sàn
- ["aff_brands","aff_intake",["f_affree"],{label:"listing nhãn"}],
- ["aff_stores","aff_intake",["f_affree"],{label:"listing cửa hàng"}],
- ["aff_services","aff_intake",["f_affree"]],
+ ["an_brands","aff_intake",["f_affree"],{bow:-16,label:"listing — cả khối Nhãn hàng"}],
+ ["an_stores","aff_intake",["f_affree"],{bow:-11,label:"listing — cả khối Cửa hàng/CSKD"}],
+ ["an_services","aff_intake",["f_affree"],{bow:-6,label:"listing — cả khối Dịch vụ"}],
  // hệ One Solution cũng listing lên Affree
  ["goollow","aff_intake",["f_affree"],{dash:1,label:"tính năng dịch vụ"}],
  ["homeinfo","aff_intake",["f_affree"],{dash:1}],
@@ -459,18 +524,26 @@ const E=[
  ["one_touch","shopify",["f_us"]],["one_touch","digitn",["f_us"]],["one_touch","affree_us",["f_us"]],
  ["affree_us","one_solution",["f_us"],{money:1,bow:520,label:"$ hồi về"}],
  ["one_touch","day_sales_omo",["f_us"],{dash:1,bow:300,label:"Mỹ → OMO"}],
+ // hội tụ về VIETNAMESE CLOUD COUNTRY (5 trụ: lãnh thổ · công dân · dân số dữ liệu · kinh tế mở · kiều bào)
+ ["msas","vcc",["f_vcc"],{dash:1,label:"lãnh thổ số"}],
+ ["daysales_id","vcc",["f_vcc"],{dash:1,label:"công dân số (A05)"}],
+ ["tep_3","vcc",["f_vcc"],{dash:1,label:"dân số dữ liệu"}],
+ ["affree","vcc",["f_vcc"],{dash:1,label:"kinh tế mở"}],
+ ["affree_us","vcc",["f_vcc"],{dash:1,label:"kiều bào US/CA"}],
+ ["one_solution","vcc",["f_vcc"],{dash:1,label:"điều phối"}],
 ];
 
 /* ============================================================
    RENDER
    ============================================================ */
 const SVGNS="http://www.w3.org/2000/svg";
-// Affree là SÀN MỞ rộng lớn: đẩy toàn bộ hệ One Solution sang phải, chừa vùng trái cho Affree
-const OFFX=440;
-const AFF_IDS=new Set(["aff_brands","aff_stores","aff_services","aff_buyers","aff_intake","affree","aff_ledger","aff_propose","aff_fee"]);
-N.forEach(n=>{if(!AFF_IDS.has(n.id))n.x+=OFFX;});
-ZONES.forEach(z=>{if(!z.aff)z.x+=OFFX;});
-const WORLD_W=1820+OFFX, WORLD_H=2180;
+// Affree là SÀN MỞ lớn → đẩy hệ One Solution sang phải (OFFX); chừa dải trên cùng cho VCC (OFFY)
+const OFFX=560, OFFY=150;
+N.forEach(n=>{ if(n.z!=='affree'&&n.z!=='vcc') n.x+=OFFX; if(n.z!=='vcc') n.y+=OFFY; });
+ZONES.forEach(z=>{ if(!z.aff&&!z.vcc) z.x+=OFFX; if(!z.vcc) z.y+=OFFY; });
+const WORLD_W=1820+OFFX, WORLD_H=2180+OFFY;
+// VCC bao trùm: khung biên quanh CẢ lưu đồ — mọi thứ bên trong = quốc gia số
+ZONES.unshift({label:"🌐 VIETNAMESE CLOUD COUNTRY · toàn bộ hệ sinh thái nằm trong quốc gia số này",x:8,y:8,w:WORLD_W-16,h:WORLD_H-16,c:ZC.vcc,vcc:true,faint:true});
 const world=document.getElementById('world');
 const wires=document.getElementById('wires');
 world.style.width=WORLD_W+'px'; world.style.height=WORLD_H+'px';
@@ -482,6 +555,8 @@ const byId=Object.fromEntries(N.map(n=>[n.id,n]));
 // node -> set of flows (from edges)
 const nodeFlows={}; N.forEach(n=>nodeFlows[n.id]=new Set());
 E.forEach(e=>{(e[2]||[]).forEach(f=>{nodeFlows[e[0]]?.add(f);nodeFlows[e[1]]?.add(f);});});
+// item chip trong Affree / VCC không có cạnh → vẫn gán đúng luồng để highlight
+N.forEach(n=>{ if(n.z==='affree')nodeFlows[n.id].add('f_affree'); if(n.z==='vcc')nodeFlows[n.id].add('f_vcc'); });
 
 // arrowhead marker
 const defs=document.createElementNS(SVGNS,'defs');
@@ -514,13 +589,16 @@ const dotLayer=document.createElementNS(SVGNS,'g'); wires.appendChild(dotLayer);
 ZONES.forEach(z=>{
   const el=document.createElement('div'); el.className='zone';
   el.style.cssText+=`left:${z.x}px;top:${z.y}px;width:${z.w}px;height:${z.h}px;--zc:${z.c}`;
-  el.innerHTML=`<span class="zlabel">${z.label}</span>`+(z.note?`<span class="znote">${z.note}</span>`:'');
+  if(z.faint){el.style.background='transparent';el.style.borderStyle='dashed';el.style.borderWidth='2px';
+    el.style.borderColor='color-mix(in srgb,var(--zc) 50%, transparent)';}
+  el.innerHTML=`<span class="zlabel"${z.faint?' style="font-size:14px"':''}>${z.label}</span>`+(z.note?`<span class="znote">${z.note}</span>`:'');
   world.appendChild(el);
 });
 
 // nodes
 const nodeEls={};
 N.forEach(n=>{
+  if(n.role==='anchor') return;   // điểm neo vô hình — chỉ dùng để vẽ mũi tên từ khối
   const el=document.createElement('div');
   el.className='node '+n.role;
   el.tabIndex=0;
@@ -599,7 +677,7 @@ function setFlow(fl){
   });
   N.forEach(n=>{
     const on=all||nodeFlows[n.id].has(fl);
-    nodeEls[n.id].classList.toggle('dim',!all&&!on);
+    nodeEls[n.id]&&nodeEls[n.id].classList.toggle('dim',!all&&!on);
   });
   buildDots();
 }
@@ -615,13 +693,13 @@ function buildDots(){
   // 'all' mode: chỉ chạy 2 vòng tiền lõi (đỡ rối). Chọn luồng: chạy đúng các tuyến của luồng đó.
   let set;
   if(activeFlow==='all'){
-    set=edgeEls.filter(e=>(e.a==='rev_hub'&&e.b==='one_solution')||(e.a==='one_solution'&&e.b==='inv'));
+    set=edgeEls.filter(e=>e.o.money);   // toàn bộ dòng tiền $ chảy về lõi — sống động nhưng cùng một mạch
   }else{
     set=edgeEls.filter(e=>e.flows.includes(activeFlow));
   }
   set.forEach(ed=>{
     const len=ed.el.getTotalLength(); if(len<14)return;
-    const n=len>820?2:1;
+    const n=len>900?2:1;
     for(let i=0;i<n;i++){
       let el;
       if(ed.o.money){
@@ -631,7 +709,7 @@ function buildDots(){
         el.style.fill=ed.flows.length?flowColor[ed.flows[0]]:'#7CC6FF';
       }
       dotLayer.appendChild(el);
-      dots.push({edge:ed,len,t:i/n,el,money:!!ed.o.money,pps:ed.o.money?72:96});
+      dots.push({edge:ed,len,t:i/n,el,money:!!ed.o.money,pps:ed.o.money?62:84});
     }
   });
 }
@@ -667,7 +745,7 @@ function neigh(id,dir){ // dir 'to' or 'from'
 function openPanel(id){
   const n=byId[id];
   panel.classList.add('show'); panel.style.setProperty('--pc',ZC[n.z]);
-  const KIND={loi:'Lõi vận hành',dist:'Phân phối · chuyên trang',cast:'Phát tán · Khúc chạm',funnel:'Phễu & hồi quy',rev:'Doanh thu',engine:'Engine Room · Core Tech',affree:'Affree',us:'Mở rộng Mỹ'};
+  const KIND={loi:'Lõi vận hành',dist:'Phân phối · chuyên trang',cast:'Phát tán · Khúc chạm',funnel:'Phễu & hồi quy',rev:'Doanh thu',engine:'Engine Room · Core Tech',affree:'Affree · Sàn mở',us:'Mở rộng Mỹ',vcc:'Vietnamese Cloud Country'};
   document.getElementById('pkind').textContent=KIND[n.z]||'';
   document.getElementById('ptitle').textContent=n.t+(n.m?' — '+n.m:'');
   document.getElementById('pdesc').textContent=n.d||'';
@@ -685,8 +763,8 @@ function fillPills(spanId,ids,rowId){
   ids.forEach(i=>{const n=byId[i];const b=document.createElement('span');b.className='pill';b.textContent=n.t;
     b.onclick=()=>{highlightNode(i);openPanel(i);};sp.appendChild(b);});
 }
-function highlightNode(id){N.forEach(n=>nodeEls[n.id].classList.toggle('hot',n.id===id));}
-document.getElementById('pclose').onclick=()=>{panel.classList.remove('show');N.forEach(n=>nodeEls[n.id].classList.remove('hot'));};
+function highlightNode(id){N.forEach(n=>nodeEls[n.id]&&nodeEls[n.id].classList.toggle('hot',n.id===id));}
+document.getElementById('pclose').onclick=()=>{panel.classList.remove('show');N.forEach(n=>nodeEls[n.id]&&nodeEls[n.id].classList.remove('hot'));};
 
 /* ============================================================
    PAN / ZOOM
@@ -711,7 +789,7 @@ let panning=false,sx,sy;
 stage.addEventListener('mousedown',ev=>{
   if(ev.target.closest('.node'))return;
   panning=true; sx=ev.clientX-tx; sy=ev.clientY-ty; stage.classList.add('grabbing');
-  if(!ev.target.closest('#panel')&&!ev.target.closest('#legend')){panel.classList.remove('show');N.forEach(n=>nodeEls[n.id].classList.remove('hot'));}
+  if(!ev.target.closest('#panel')&&!ev.target.closest('#legend')){panel.classList.remove('show');N.forEach(n=>nodeEls[n.id]&&nodeEls[n.id].classList.remove('hot'));}
 });
 window.addEventListener('mousemove',ev=>{
   if(nodeDrag){doNodeDrag(ev);return;}
@@ -777,6 +855,13 @@ document.getElementById('btnSave').onclick=()=>{
    GROWTH OVERLAY
    ============================================================ */
 const growth=document.getElementById('growth'),btnGrowth=document.getElementById('btnGrowth');
+// Light / Dark switch
+const btnTheme=document.getElementById('btnTheme');
+btnTheme.onclick=()=>{
+  const isLight=document.documentElement.getAttribute('data-theme')==='light';
+  document.documentElement.setAttribute('data-theme',isLight?'dark':'light');
+  btnTheme.textContent=isLight?'🌗 Light':'🌙 Dark';
+};
 btnGrowth.onclick=()=>{const on=!growth.classList.contains('show');growth.classList.toggle('show',on);btnGrowth.classList.toggle('on',on);};
 document.getElementById('gclose').onclick=()=>{growth.classList.remove('show');btnGrowth.classList.remove('on');};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){growth.classList.remove('show');btnGrowth.classList.remove('on');panel.classList.remove('show');}});
